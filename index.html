@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Księga Podatkowa Rancha</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #2b1d14 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            font-family: 'Playfair Display', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #332;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #2b1a10;
+        }
+
+        /* Stylizacja Książki */
+        .scene {
+            width: 800px;
+            height: 550px;
+            perspective: 1500px;
+            margin-top: 30px;
+            position: relative;
+        }
+
+        .book {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .page {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            padding: 25px;
+            box-sizing: border-box;
+            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 5px 5px 15px rgba(0,0,0,0.8);
+            border: 1px solid #c2b280;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-page {
+            left: 0;
+            border-radius: 10px 0 0 10px;
+            border-right: 2px solid #8b7355;
+        }
+
+        .right-page {
+            right: 0;
+            border-radius: 0 10px 10px 0;
+            border-left: 2px solid #8b7355;
+            overflow-y: auto;
+        }
+
+        .cover {
+            left: 50%;
+            width: 50%;
+            background: #3e2723 url('https://www.transparenttextures.com/patterns/leather.png');
+            color: #d4af37;
+            border-radius: 0 10px 10px 0;
+            transform-origin: left;
+            transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
+            border: 2px solid #1a0f0b;
+        }
+
+        .cover h1 {
+            font-family: 'Special Elite', cursive;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px #000;
+            color: #d4af37;
+        }
+
+        .book.open .cover {
+            transform: rotateY(-180deg);
+            pointer-events: none;
+        }
+
+        /* Formularz wprowadzania danych */
+        .controls {
+            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            width: 800px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #8b7355;
+            display: none;
+        }
+
+        .controls input, .controls select, .controls button {
+            padding: 8px;
+            font-family: 'Playfair Display', serif;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid #8b7355;
+            border-radius: 3px;
+        }
+
+        .controls button {
+            background: #3e2723;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .controls button:hover { background: #5d4037; }
+
+        .controls .close-btn-panel {
+            background: #8b2323;
+            border-color: #5c1414;
+        }
+
+        .controls .close-btn-panel:hover { background: #5c1414; }
+
+        /* Lista wpisów */
+        .entry-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-family: 'Special Elite', cursive;
+            font-size: 13px;
+            flex-grow: 1;
+        }
+
+        .entry-list li {
+            border-bottom: 1px dashed #8b7355;
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .positive { color: #1b5e20; font-weight: bold; }
+        .negative { color: #b71c1c; font-weight: bold; }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px solid #8b7355;
+            font-family: 'Special Elite', cursive;
+            font-size: 14px;
+        }
+
+        .pagination button {
+            background: transparent;
+            border: none;
+            color: #3e2723;
+            font-family: 'Special Elite', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .pagination button:disabled {
+            color: #aaa;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        .page-name {
+            text-align: center;
+            font-style: italic;
+            color: #5d4037;
+            margin-bottom: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid #8b7355;
+            padding-bottom: 5px;
+        }
+
+        .page::-webkit-scrollbar { width: 5px; }
+        .page::-webkit-scrollbar-thumb { background: #8b7355; }
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="book" id="book">
+            <div class="page cover" id="cover" onclick="openBook()">
+                <h1>Księga Rancha</h1>
+                <p style="color: #ccc; font-style: italic;">(Kliknij, aby otworzyć)</p>
+            </div>
+
+            <div class="page left-page">
+                <h2>Rejestr Działań</h2>
+                <div class="page-name" id="left-page-name">Księga Główna - Strona 1</div>
+                
+                <ul class="entry-list" id="ledger-entries"></ul>
+
+                <div class="pagination">
+                    <button id="btn-prev" onclick="changePage(-1)">&#8592; Poprzednia</button>
+                    <span id="page-indicator">1 / 1</span>
+                    <button id="btn-next" onclick="changePage(1)">Następna &#8594;</button>
+                </div>
+            </div>
+
+            <div class="page right-page">
+                <h2>Podsumowanie Rancha</h2>
+                <div class="page-name">Stan Całkowity</div>
+                
+                <div style="margin-top: 10px;">
+                    <h3>Stan Skarbca: <span id="total-money">0</span> $</h3>
+                    <hr style="border: 0; border-top: 1px dashed #8b7355;">
+                    <h3>Inwentarz:</h3>
+                    <ul class="entry-list" id="inventory-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls" id="controls">
+        <input type="text" id="personName" placeholder="Kto? (np. Arthur)" required>
+        
+        <select id="actionType" onchange="toggleQuantityField()">
+            <option value="money_add">Wpłacił gotówkę (+)</option>
+            <option value="money_take">Zabrał gotówkę (-)</option>
+            <option value="item_add">Przyniósł przedmiot (+)</option>
+            <option value="item_take">Zabrał przedmiot (-)</option>
+        </select>
+        
+        <input type="text" id="amountOrItem" placeholder="Kwota ($)" required>
+        
+        <input type="number" id="itemQuantity" placeholder="Sztuk" value="1" min="1" style="display: none; width: 60px;" title="Ilość sztuk">
+        
+        <button onclick="addEntry()">Zapisz</button>
+        <button onclick="closeBook()" class="close-btn-panel">✖ Zamknij Księgę</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjdCjTkbB4INtTvcW3BmqFIvVmH7of9Yg",
+  authDomain: "ksiegarancha.firebaseapp.com",
+  databaseURL: "https://ksiegarancha-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ksiegarancha",
+  storageBucket: "ksiegarancha.firebasestorage.app",
+  messagingSenderId: "166691689347",
+  appId: "1:166691689347:web:26acc4879308b5bcdd9cb6",
+  measurementId: "G-1KDS8CQGRT"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        let ledgerData = [];
+        let totalMoney = 0;
+        let inventory = {};
+        
+        let currentPage = 1;
+        const entriesPerPage = 7;
+
+        function openBook() {
+            document.getElementById('book').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('controls').style.display = 'flex';
+                toggleQuantityField(); // Ustawia poprawne pola przy otwarciu
+            }, 1000);
+        }
+
+        function closeBook() {
+            document.getElementById('book').classList.remove('open');
+            document.getElementById('controls').style.display = 'none';
+        }
+
+        // Funkcja pokazywania/ukrywania pola Ilość
+        function toggleQuantityField() {
+            const action = document.getElementById('actionType').value;
+            const amountInput = document.getElementById('amountOrItem');
+            const qtyInput = document.getElementById('itemQuantity');
+            
+            if(action.startsWith('item')) {
+                amountInput.placeholder = "Nazwa przedmiotu";
+                qtyInput.style.display = 'inline-block';
+            } else {
+                amountInput.placeholder = "Kwota ($)";
+                qtyInput.style.display = 'none';
+            }
+        }
+
+        database.ref('wspolna_ksiega').on('value', (snapshot) => {
+            const data = snapshot.val();
+            
+            ledgerData = [];
+            totalMoney = 0;
+            inventory = {};
+
+            if (data) {
+                Object.values(data).forEach(entry => {
+                    ledgerData.push(entry);
+
+                    // Pobieramy ilość (jeśli to stary wpis bez ilości, to daje 1)
+                    let qty = entry.quantity ? parseInt(entry.quantity) : 1;
+
+                    if (entry.action === 'money_add') {
+                        totalMoney += parseFloat(entry.value);
+                    } else if (entry.action === 'money_take') {
+                        totalMoney -= parseFloat(entry.value);
+                    } else if (entry.action === 'item_add') {
+                        inventory[entry.value] = (inventory[entry.value] || 0) + qty;
+                    } else if (entry.action === 'item_take') {
+                        if (inventory[entry.value] && inventory[entry.value] > 0) {
+                            inventory[entry.value] -= qty;
+                            // Jeśli zabrano wszystko lub więcej niż było, usuń z inwentarza
+                            if(inventory[entry.value] <= 0) delete inventory[entry.value];
+                        }
+                    }
+                });
+            }
+            updateUI();
+        });
+
+        function addEntry() {
+            const name = document.getElementById('personName').value;
+            const action = document.getElementById('actionType').value;
+            const value = document.getElementById('amountOrItem').value;
+            let quantity = 1;
+            
+            // Jeśli wybrano przedmiot, pobierz wartość z okienka "Ilość"
+            if(action.startsWith('item')) {
+                quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+            }
+
+            const date = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
+
+            if (!name || !value) {
+                alert("Wpisz imię i kwotę/przedmiot, kowboju!");
+                return;
+            }
+
+            // Wysyłamy nową właściwość: quantity
+            const entry = { date, name, action, value, quantity };
+            database.ref('wspolna_ksiega').push(entry);
+            
+            // Resetowanie pól po dodaniu
+            document.getElementById('amountOrItem').value = '';
+            document.getElementById('itemQuantity').value = '1';
+            currentPage = 1; 
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            updateUI();
+        }
+
+        function updateUI() {
+            const reversedData = [...ledgerData].reverse();
+            const totalPages = Math.ceil(reversedData.length / entriesPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * entriesPerPage;
+            const endIndex = startIndex + entriesPerPage;
+            const currentEntries = reversedData.slice(startIndex, endIndex);
+
+            const entriesList = document.getElementById('ledger-entries');
+            entriesList.innerHTML = '';
+            
+            currentEntries.forEach(entry => {
+                const li = document.createElement('li');
+                let actionText = '';
+                let colorClass = '';
+                let qty = entry.quantity ? parseInt(entry.quantity) : 1; // Zabezpieczenie dla starych wpisów
+
+                switch(entry.action) {
+                    case 'money_add': actionText = `wpłacił(a) ${entry.value}$`; colorClass = 'positive'; break;
+                    case 'money_take': actionText = `zabrał(a) ${entry.value}$`; colorClass = 'negative'; break;
+                    case 'item_add': actionText = `przyniósł/niosła: ${entry.value} (x${qty})`; colorClass = 'positive'; break;
+                    case 'item_take': actionText = `zabrał(a): ${entry.value} (x${qty})`; colorClass = 'negative'; break;
+                }
+
+                li.innerHTML = `<span>[${entry.date}] <b>${entry.name}</b></span> <span class="${colorClass}">${actionText}</span>`;
+                entriesList.appendChild(li);
+            });
+
+            document.getElementById('left-page-name').innerText = `Księga Główna - Strona ${currentPage}`;
+            document.getElementById('page-indicator').innerText = `${currentPage} / ${totalPages}`;
+            document.getElementById('btn-prev').disabled = currentPage === 1;
+            document.getElementById('btn-next').disabled = currentPage === totalPages;
+
+            document.getElementById('total-money').innerText = totalMoney.toFixed(2);
+            document.getElementById('total-money').className = totalMoney >= 0 ? 'positive' : 'negative';
+
+            const inventoryList = document.getElementById('inventory-list');
+            inventoryList.innerHTML = '';
+            for (const [item, count] of Object.entries(inventory)) {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${item}</span> <span>x${count}</span>`;
+                inventoryList.appendChild(li);
+            }
+        }
+    </script>
+</body>
+</html>
