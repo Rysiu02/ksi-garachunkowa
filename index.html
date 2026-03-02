@@ -204,43 +204,60 @@
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
 
+        /* ========================================= */
+        /* WERSJA MOBILNA (Ekrany poniżej 850px) */
+        /* ========================================= */
         @media (max-width: 850px) {
             .scene { 
-                height: auto; 
+                height: auto !important; 
                 margin-top: 10px;
             }
             .book { 
                 display: flex; 
                 flex-direction: column; 
                 gap: 20px; 
+                height: auto !important; /* Pozwala całej książce rosnąć */
             }
             .page { 
                 position: static; 
                 width: 100%; 
-                height: auto; /* POPRAWKA: Automatyczna wysokość strony */
-                min-height: 450px; /* Minimalna wysokość, by ładnie wyglądało pustem */
+                height: auto !important; /* Kartka dopasowuje się do zawartości */
+                min-height: 450px; 
                 border-radius: 10px !important; 
                 border: 2px solid #8b7355 !important;
+                display: block !important; /* Wyłącza sztywny układ flex na telefonie */
+                overflow: visible !important; /* Zapobiega ucinaniu przycisków */
+                padding-bottom: 25px !important; /* Daje oddech przyciskom na samym dole */
             }
+            
+            /* Logika okładki na telefonach */
             .cover { 
                 position: static; 
-                height: 300px; 
+                height: 300px !important; 
+                display: flex !important; /* Okładka musi zostać flexem, by wyśrodkować tytuł */
             }
+            
+            /* Domyślnie ukrywamy strony na telefonie */
             .left-page, .right-page { 
-                display: none; 
+                display: none !important; 
             }
+            
+            /* Gdy otwarte: Pokaż strony jako zwykłe bloki, ukryj okładkę */
             .book.open .left-page, .book.open .right-page { 
-                display: flex; 
+                display: block !important; 
             }
             .book.open .cover { 
-                display: none; 
+                display: none !important; 
             }
+
+            /* Dostosowanie przycisków na dole na mały ekran */
             .controls {
                 flex-direction: column;
                 align-items: stretch;
             }
             .controls input, .controls select, .controls button {
                 width: 100%;
+                box-sizing: border-box; /* Zabezpiecza formularz przed wychodzeniem za ekran */
             }
             #itemQuantity {
                 width: 100% !important; 
