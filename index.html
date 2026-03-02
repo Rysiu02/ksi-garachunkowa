@@ -35,12 +35,19 @@
             position: relative;
         }
 
+        /* Dodano: transform: translateX(-25%) żeby wyśrodkować zamkniętą okładkę */
         .book {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 1s;
+            transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform: translateX(-25%); 
+        }
+
+        /* Dodano: Książka wędruje na swoje miejsce po otwarciu */
+        .book.open {
+            transform: translateX(0); 
         }
 
         .page {
@@ -57,11 +64,15 @@
             flex-direction: column;
         }
 
+        /* Ukrywamy zawartość kartek do momentu otwarcia */
         .left-page {
             left: 0;
             border-radius: 10px 0 0 10px;
             border-right: 2px solid #8b7355;
-            overflow-y: auto; /* Zabezpieczenie przed ucinaniem */
+            overflow-y: auto;
+            opacity: 0; 
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
 
         .right-page {
@@ -69,6 +80,17 @@
             border-radius: 0 10px 10px 0;
             border-left: 2px solid #8b7355;
             overflow-y: auto;
+            opacity: 0; 
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        /* Pokazujemy kartki, gdy książka jest otwarta */
+        .book.open .left-page, 
+        .book.open .right-page {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.8s ease 0.4s, visibility 0s 0.4s; /* Lekkie opóźnienie na animację okładki */
         }
 
         .cover {
@@ -204,9 +226,6 @@
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
 
-        /* ========================================= */
-        /* WERSJA MOBILNA (Ekrany poniżej 850px) */
-        /* ========================================= */
         @media (max-width: 850px) {
             .scene { 
                 height: auto !important; 
@@ -216,33 +235,36 @@
                 display: flex; 
                 flex-direction: column; 
                 gap: 20px; 
-                height: auto !important; /* Pozwala całej książce rosnąć */
+                height: auto !important; 
+                transform: translateX(0) !important; /* Reset przesunięcia dla telefonów */
+            }
+            .book.open {
+                transform: translateX(0) !important;
             }
             .page { 
                 position: static; 
                 width: 100%; 
-                height: auto !important; /* Kartka dopasowuje się do zawartości */
+                height: auto !important; 
                 min-height: 450px; 
                 border-radius: 10px !important; 
                 border: 2px solid #8b7355 !important;
-                display: block !important; /* Wyłącza sztywny układ flex na telefonie */
-                overflow: visible !important; /* Zapobiega ucinaniu przycisków */
-                padding-bottom: 25px !important; /* Daje oddech przyciskom na samym dole */
+                display: block !important; 
+                overflow: visible !important; 
+                padding-bottom: 25px !important; 
             }
             
-            /* Logika okładki na telefonach */
             .cover { 
                 position: static; 
                 height: 300px !important; 
-                display: flex !important; /* Okładka musi zostać flexem, by wyśrodkować tytuł */
+                display: flex !important; 
             }
             
-            /* Domyślnie ukrywamy strony na telefonie */
             .left-page, .right-page { 
                 display: none !important; 
+                opacity: 1; /* Reset opacity na telefonach */
+                visibility: visible;
             }
             
-            /* Gdy otwarte: Pokaż strony jako zwykłe bloki, ukryj okładkę */
             .book.open .left-page, .book.open .right-page { 
                 display: block !important; 
             }
@@ -250,14 +272,13 @@
                 display: none !important; 
             }
 
-            /* Dostosowanie przycisków na dole na mały ekran */
             .controls {
                 flex-direction: column;
                 align-items: stretch;
             }
             .controls input, .controls select, .controls button {
                 width: 100%;
-                box-sizing: border-box; /* Zabezpiecza formularz przed wychodzeniem za ekran */
+                box-sizing: border-box; 
             }
             #itemQuantity {
                 width: 100% !important; 
