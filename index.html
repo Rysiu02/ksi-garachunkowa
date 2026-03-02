@@ -319,7 +319,7 @@
                 <div class="page-name">Stan Całkowity</div>
                 
                 <div style="margin-top: 10px;">
-                    <h3>Stan Skarbca: <span id="total-money">0</span> $</h3>
+                    <h3>Stan Skarbca: <span id="total-money">0 $</span></h3>
                     <hr style="border: 0; border-top: 1px dashed #8b7355;">
                     <h3>Inwentarz:</h3>
                     <ul class="entry-list" id="inventory-list"></ul>
@@ -505,7 +505,7 @@
             document.getElementById('btn-prev').disabled = currentPage === 1;
             document.getElementById('btn-next').disabled = currentPage === totalPages;
 
-            document.getElementById('total-money').innerText = totalMoney.toFixed(2);
+            document.getElementById('total-money').innerText = totalMoney.toFixed(2) + ' $';
             document.getElementById('total-money').className = totalMoney >= 0 ? 'positive' : 'negative';
 
             const inventoryList = document.getElementById('inventory-list');
