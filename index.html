@@ -26,7 +26,6 @@
             color: #2b1a10;
         }
 
-        /* Stylizacja Książki - Główne (Desktop) */
         .scene {
             width: 100%;
             max-width: 800px;
@@ -62,6 +61,7 @@
             left: 0;
             border-radius: 10px 0 0 10px;
             border-right: 2px solid #8b7355;
+            overflow-y: auto; /* Zabezpieczenie przed ucinaniem */
         }
 
         .right-page {
@@ -92,7 +92,6 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 2px 2px 4px #000;
-            color: #d4af37;
             text-align: center;
         }
 
@@ -101,7 +100,6 @@
             pointer-events: none;
         }
 
-        /* Formularz wprowadzania danych */
         .controls {
             background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
             padding: 15px;
@@ -146,7 +144,6 @@
 
         .controls .close-btn-panel:hover { background: #5c1414; }
 
-        /* Lista wpisów */
         .entry-list {
             list-style: none;
             padding: 0;
@@ -207,12 +204,9 @@
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
 
-        /* ========================================= */
-        /* WERSJA MOBILNA (Ekrany poniżej 850px) */
-        /* ========================================= */
         @media (max-width: 850px) {
             .scene { 
-                height: auto; /* Pozwala zawartości rosnąć w dół */
+                height: auto; 
                 margin-top: 10px;
             }
             .book { 
@@ -221,33 +215,26 @@
                 gap: 20px; 
             }
             .page { 
-                position: static; /* Usuwa ułożenie 3D "jedno na drugim" */
+                position: static; 
                 width: 100%; 
-                height: 450px; /* Stała wysokość na stronę dla scrollowania */
-                border-radius: 10px !important; /* Pełne zaokrąglenie dla obu stron */
+                height: auto; /* POPRAWKA: Automatyczna wysokość strony */
+                min-height: 450px; /* Minimalna wysokość, by ładnie wyglądało pustem */
+                border-radius: 10px !important; 
                 border: 2px solid #8b7355 !important;
             }
-            
-            /* Logika okładki na telefonach */
             .cover { 
                 position: static; 
                 height: 300px; 
             }
-            
-            /* Domyślnie ukrywamy strony na telefonie, póki okładka jest zamknięta */
             .left-page, .right-page { 
                 display: none; 
             }
-            
-            /* Gdy otwarte: Pokaż strony, ukryj okładkę */
             .book.open .left-page, .book.open .right-page { 
                 display: flex; 
             }
             .book.open .cover { 
                 display: none; 
             }
-
-            /* Dostosowanie przycisków na dole na mały ekran */
             .controls {
                 flex-direction: column;
                 align-items: stretch;
@@ -256,7 +243,7 @@
                 width: 100%;
             }
             #itemQuantity {
-                width: 100% !important; /* Wymuszenie szerokości na pole z ilością */
+                width: 100% !important; 
             }
         }
     </style>
@@ -348,17 +335,15 @@
                 document.getElementById('controls').style.display = 'flex';
                 toggleQuantityField(); 
                 
-                // Na urządzeniach mobilnych zjedź płynnie w dół do formularza po otwarciu
                 if (window.innerWidth <= 850) {
                     document.getElementById('controls').scrollIntoView({ behavior: 'smooth' });
                 }
-            }, 1000); // Desktop czeka na animację 3D, mobile otwiera niemal od razu
+            }, 1000); 
         }
 
         function closeBook() {
             document.getElementById('book').classList.remove('open');
             document.getElementById('controls').style.display = 'none';
-            // Przewiń do góry po zamknięciu
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -430,7 +415,6 @@
             document.getElementById('itemQuantity').value = '1';
             currentPage = 1; 
             
-            // Po dodaniu zjedź lekko w dół, by zobaczyć, co się dodało na mobilce
             if (window.innerWidth <= 850) {
                  document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
             }
