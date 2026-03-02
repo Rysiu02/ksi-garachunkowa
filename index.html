@@ -9,7 +9,7 @@
 
         body {
             margin: 0;
-            padding: 0;
+            padding: 10px;
             background: #2b1d14 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
             font-family: 'Playfair Display', serif;
             display: flex;
@@ -17,6 +17,7 @@
             align-items: center;
             min-height: 100vh;
             color: #332;
+            box-sizing: border-box;
         }
 
         h1, h2, h3 {
@@ -25,12 +26,13 @@
             color: #2b1a10;
         }
 
-        /* Stylizacja Książki */
+        /* Stylizacja Książki - Główne (Desktop) */
         .scene {
-            width: 800px;
+            width: 100%;
+            max-width: 800px;
             height: 550px;
             perspective: 1500px;
-            margin-top: 30px;
+            margin-top: 20px;
             position: relative;
         }
 
@@ -91,6 +93,7 @@
             letter-spacing: 2px;
             text-shadow: 2px 2px 4px #000;
             color: #d4af37;
+            text-align: center;
         }
 
         .book.open .cover {
@@ -105,20 +108,23 @@
             margin-top: 30px;
             border-radius: 5px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            width: 800px;
-            display: flex;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+            display: none;
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
             border: 2px solid #8b7355;
-            display: none;
+            margin-bottom: 30px;
         }
 
         .controls input, .controls select, .controls button {
-            padding: 8px;
+            padding: 10px;
             font-family: 'Playfair Display', serif;
-            background: rgba(255,255,255,0.5);
+            font-size: 14px;
+            background: rgba(255,255,255,0.7);
             border: 1px solid #8b7355;
             border-radius: 3px;
         }
@@ -128,6 +134,7 @@
             color: #fff;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
         }
 
         .controls button:hover { background: #5d4037; }
@@ -145,7 +152,7 @@
             padding: 0;
             margin: 0;
             font-family: 'Special Elite', cursive;
-            font-size: 13px;
+            font-size: 14px;
             flex-grow: 1;
         }
 
@@ -178,6 +185,7 @@
             font-weight: bold;
             cursor: pointer;
             text-decoration: underline;
+            padding: 5px;
         }
 
         .pagination button:disabled {
@@ -198,6 +206,59 @@
 
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
+
+        /* ========================================= */
+        /* WERSJA MOBILNA (Ekrany poniżej 850px) */
+        /* ========================================= */
+        @media (max-width: 850px) {
+            .scene { 
+                height: auto; /* Pozwala zawartości rosnąć w dół */
+                margin-top: 10px;
+            }
+            .book { 
+                display: flex; 
+                flex-direction: column; 
+                gap: 20px; 
+            }
+            .page { 
+                position: static; /* Usuwa ułożenie 3D "jedno na drugim" */
+                width: 100%; 
+                height: 450px; /* Stała wysokość na stronę dla scrollowania */
+                border-radius: 10px !important; /* Pełne zaokrąglenie dla obu stron */
+                border: 2px solid #8b7355 !important;
+            }
+            
+            /* Logika okładki na telefonach */
+            .cover { 
+                position: static; 
+                height: 300px; 
+            }
+            
+            /* Domyślnie ukrywamy strony na telefonie, póki okładka jest zamknięta */
+            .left-page, .right-page { 
+                display: none; 
+            }
+            
+            /* Gdy otwarte: Pokaż strony, ukryj okładkę */
+            .book.open .left-page, .book.open .right-page { 
+                display: flex; 
+            }
+            .book.open .cover { 
+                display: none; 
+            }
+
+            /* Dostosowanie przycisków na dole na mały ekran */
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .controls input, .controls select, .controls button {
+                width: 100%;
+            }
+            #itemQuantity {
+                width: 100% !important; /* Wymuszenie szerokości na pole z ilością */
+            }
+        }
     </style>
 </head>
 <body>
@@ -248,9 +309,9 @@
         
         <input type="text" id="amountOrItem" placeholder="Kwota ($)" required>
         
-        <input type="number" id="itemQuantity" placeholder="Sztuk" value="1" min="1" style="display: none; width: 60px;" title="Ilość sztuk">
+        <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
         
-        <button onclick="addEntry()">Zapisz</button>
+        <button onclick="addEntry()">Zapisz wpis</button>
         <button onclick="closeBook()" class="close-btn-panel">✖ Zamknij Księgę</button>
     </div>
 
@@ -260,13 +321,13 @@
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBjdCjTkbB4INtTvcW3BmqFIvVmH7of9Yg",
-  authDomain: "ksiegarancha.firebaseapp.com",
-  databaseURL: "https://ksiegarancha-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "ksiegarancha",
-  storageBucket: "ksiegarancha.firebasestorage.app",
-  messagingSenderId: "166691689347",
-  appId: "1:166691689347:web:26acc4879308b5bcdd9cb6",
-  measurementId: "G-1KDS8CQGRT"
+            authDomain: "ksiegarancha.firebaseapp.com",
+            databaseURL: "https://ksiegarancha-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "ksiegarancha",
+            storageBucket: "ksiegarancha.firebasestorage.app",
+            messagingSenderId: "166691689347",
+            appId: "1:166691689347:web:26acc4879308b5bcdd9cb6",
+            measurementId: "G-1KDS8CQGRT"
         };
 
         if (!firebase.apps.length) {
@@ -285,16 +346,22 @@
             document.getElementById('book').classList.add('open');
             setTimeout(() => {
                 document.getElementById('controls').style.display = 'flex';
-                toggleQuantityField(); // Ustawia poprawne pola przy otwarciu
-            }, 1000);
+                toggleQuantityField(); 
+                
+                // Na urządzeniach mobilnych zjedź płynnie w dół do formularza po otwarciu
+                if (window.innerWidth <= 850) {
+                    document.getElementById('controls').scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 1000); // Desktop czeka na animację 3D, mobile otwiera niemal od razu
         }
 
         function closeBook() {
             document.getElementById('book').classList.remove('open');
             document.getElementById('controls').style.display = 'none';
+            // Przewiń do góry po zamknięciu
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Funkcja pokazywania/ukrywania pola Ilość
         function toggleQuantityField() {
             const action = document.getElementById('actionType').value;
             const amountInput = document.getElementById('amountOrItem');
@@ -302,7 +369,7 @@
             
             if(action.startsWith('item')) {
                 amountInput.placeholder = "Nazwa przedmiotu";
-                qtyInput.style.display = 'inline-block';
+                qtyInput.style.display = window.innerWidth <= 850 ? 'block' : 'inline-block';
             } else {
                 amountInput.placeholder = "Kwota ($)";
                 qtyInput.style.display = 'none';
@@ -320,7 +387,6 @@
                 Object.values(data).forEach(entry => {
                     ledgerData.push(entry);
 
-                    // Pobieramy ilość (jeśli to stary wpis bez ilości, to daje 1)
                     let qty = entry.quantity ? parseInt(entry.quantity) : 1;
 
                     if (entry.action === 'money_add') {
@@ -332,7 +398,6 @@
                     } else if (entry.action === 'item_take') {
                         if (inventory[entry.value] && inventory[entry.value] > 0) {
                             inventory[entry.value] -= qty;
-                            // Jeśli zabrano wszystko lub więcej niż było, usuń z inwentarza
                             if(inventory[entry.value] <= 0) delete inventory[entry.value];
                         }
                     }
@@ -347,7 +412,6 @@
             const value = document.getElementById('amountOrItem').value;
             let quantity = 1;
             
-            // Jeśli wybrano przedmiot, pobierz wartość z okienka "Ilość"
             if(action.startsWith('item')) {
                 quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
             }
@@ -359,14 +423,17 @@
                 return;
             }
 
-            // Wysyłamy nową właściwość: quantity
             const entry = { date, name, action, value, quantity };
             database.ref('wspolna_ksiega').push(entry);
             
-            // Resetowanie pól po dodaniu
             document.getElementById('amountOrItem').value = '';
             document.getElementById('itemQuantity').value = '1';
             currentPage = 1; 
+            
+            // Po dodaniu zjedź lekko w dół, by zobaczyć, co się dodało na mobilce
+            if (window.innerWidth <= 850) {
+                 document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         function changePage(direction) {
@@ -392,7 +459,7 @@
                 const li = document.createElement('li');
                 let actionText = '';
                 let colorClass = '';
-                let qty = entry.quantity ? parseInt(entry.quantity) : 1; // Zabezpieczenie dla starych wpisów
+                let qty = entry.quantity ? parseInt(entry.quantity) : 1; 
 
                 switch(entry.action) {
                     case 'money_add': actionText = `wpłacił(a) ${entry.value}$`; colorClass = 'positive'; break;
