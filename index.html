@@ -35,7 +35,6 @@
             position: relative;
         }
 
-        /* Dodano: transform: translateX(-25%) żeby wyśrodkować zamkniętą okładkę */
         .book {
             width: 100%;
             height: 100%;
@@ -45,7 +44,6 @@
             transform: translateX(-25%); 
         }
 
-        /* Dodano: Książka wędruje na swoje miejsce po otwarciu */
         .book.open {
             transform: translateX(0); 
         }
@@ -64,7 +62,6 @@
             flex-direction: column;
         }
 
-        /* Ukrywamy zawartość kartek do momentu otwarcia */
         .left-page {
             left: 0;
             border-radius: 10px 0 0 10px;
@@ -72,7 +69,9 @@
             overflow-y: auto;
             opacity: 0; 
             visibility: hidden;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            z-index: 1; 
+            /* Szybsze znikanie przy zamykaniu */
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
 
         .right-page {
@@ -82,15 +81,17 @@
             overflow-y: auto;
             opacity: 0; 
             visibility: hidden;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            z-index: 1;
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
 
-        /* Pokazujemy kartki, gdy książka jest otwarta */
+        /* POPRAWKA: Wydłużone opóźnienie (0.9s), żeby okładka zdążyła opaść */
         .book.open .left-page, 
         .book.open .right-page {
             opacity: 1;
             visibility: visible;
-            transition: opacity 0.8s ease 0.4s, visibility 0s 0.4s; /* Lekkie opóźnienie na animację okładki */
+            z-index: 5; 
+            transition: opacity 0.6s ease 0.9s, visibility 0s 0.9s; 
         }
 
         .cover {
@@ -101,12 +102,14 @@
             border-radius: 0 10px 10px 0;
             transform-origin: left;
             transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
-            z-index: 10;
+            z-index: 10; 
             justify-content: center;
             align-items: center;
             cursor: pointer;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
             border: 2px solid #1a0f0b;
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
         }
 
         .cover h1 {
@@ -120,6 +123,7 @@
         .book.open .cover {
             transform: rotateY(-180deg);
             pointer-events: none;
+            z-index: 0; 
         }
 
         .controls {
@@ -236,7 +240,7 @@
                 flex-direction: column; 
                 gap: 20px; 
                 height: auto !important; 
-                transform: translateX(0) !important; /* Reset przesunięcia dla telefonów */
+                transform: translateX(0) !important; 
             }
             .book.open {
                 transform: translateX(0) !important;
@@ -261,12 +265,14 @@
             
             .left-page, .right-page { 
                 display: none !important; 
-                opacity: 1; /* Reset opacity na telefonach */
-                visibility: visible;
+                opacity: 1 !important; 
+                visibility: visible !important;
             }
             
             .book.open .left-page, .book.open .right-page { 
                 display: block !important; 
+                opacity: 1 !important; 
+                visibility: visible !important;
             }
             .book.open .cover { 
                 display: none !important; 
