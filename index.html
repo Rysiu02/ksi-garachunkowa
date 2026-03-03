@@ -22,7 +22,7 @@
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Cpolygon points='2,2 2,22 7,17 12,26 16,24 11,15 20,15' fill='%233e2723' stroke='%23d4af37' stroke-width='1.5'/%3E%3C/svg%3E") 2 2, auto;
         }
 
-        .cover, .fold-wrapper, button, select {
+        .cover, .fold-wrapper, button, select, .notification-badge {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='rgba(62,39,35,0.2)' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='6' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='18' x2='12' y2='24' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='0' y1='12' x2='6' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='18' y1='12' x2='24' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b71c1c'/%3E%3C/svg%3E") 12 12, pointer !important;
         }
 
@@ -56,6 +56,40 @@
 
         .book.open {
             transform: translateX(0); 
+        }
+
+        /* --- POWIADOMIENIA (SYSTEM ZNACZKÓW) --- */
+        .notification-badge {
+            position: absolute;
+            background: #b71c1c;
+            color: #fff;
+            font-family: 'Special Elite', cursive;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 2px solid #1a0f0b;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 100;
+            pointer-events: none; /* Nie blokuje kliknięć pod spodem */
+            animation: pulseBadge 1.5s infinite;
+        }
+
+        @keyframes pulseBadge {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #note-badge-cover {
+            top: 20px;
+            right: 20px;
+        }
+
+        #note-badge-corner {
+            top: 15px;
+            right: 50px;
+            white-space: nowrap;
         }
 
         /* --- SPREADY (ROZKŁADÓWKI) --- */
@@ -262,9 +296,7 @@
             .book.open .spread.active { display: flex !important; animation: mobileFade 0.3s ease; }
 
             .page { 
-                /* POPRAWKA: Relative jest niezbędne, by rogi trzymały się górnych krawędzi kartek na telefonie! */
-                position: relative !important; 
-                width: 100% !important; height: auto !important; min-height: 450px !important; 
+                position: relative !important; width: 100% !important; height: auto !important; min-height: 450px !important; 
                 border-radius: 10px !important; border: 2px solid #8b7355 !important; display: block !important; 
                 overflow: visible !important; padding-bottom: 25px !important; 
             }
@@ -283,6 +315,8 @@
     <div class="scene">
         <div class="book" id="book">
             <div class="page cover" id="cover" onclick="openBook()">
+                <div class="notification-badge" id="note-badge-cover">Nowa!</div>
+                
                 <h1>Księga Rancha</h1>
                 <p style="color: #ccc; font-style: italic;">(Kliknij, aby otworzyć)</p>
             </div>
@@ -301,6 +335,7 @@
 
                 <div class="page right-page">
                     <div class="fold-wrapper top-right" onclick="switchSpread(2)" title="Przewróć kartkę">
+                        <div class="notification-badge" id="note-badge-corner">Nowa notatka!</div>
                         <div class="fold"></div>
                     </div>
 
@@ -426,6 +461,19 @@
             document.querySelectorAll('.spread').forEach(s => s.classList.remove('active'));
             document.getElementById('spread-' + spreadId).classList.add('active');
             
+            // SYSTEM POWIADOMIEŃ: Resetowanie licznika po wejściu w Notatki
+            if (spreadId === 2) {
+                let seenNotes = parseInt(localStorage.getItem('seenNotesCount')) || 0;
+                
+                // Jeśli są nowe notatki, przenieś użytkownika od razu do najnowszej!
+                if (notesData.length > seenNotes) {
+                    currentNotePage = notesData.length; 
+                }
+                
+                localStorage.setItem('seenNotesCount', notesData.length);
+                updateUI(); // Odśwież UI, żeby schować znaczki i pokazać najnowszą stronę
+            }
+
             if (window.innerWidth <= 850 && document.getElementById('book').classList.contains('open')) {
                 document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
             }
@@ -556,7 +604,26 @@
             updateUI();
         }
 
+        // Funkcja sterująca czerwonymi znaczkami powiadomień
+        function updateNotifications() {
+            let seenNotes = parseInt(localStorage.getItem('seenNotesCount')) || 0;
+            let coverBadge = document.getElementById('note-badge-cover');
+            let cornerBadge = document.getElementById('note-badge-corner');
+
+            if (notesData.length > seenNotes) {
+                let unread = notesData.length - seenNotes;
+                coverBadge.innerText = unread + " Nowa!";
+                coverBadge.style.display = 'block';
+                cornerBadge.innerText = unread + " Nowa!";
+                cornerBadge.style.display = 'block';
+            } else {
+                coverBadge.style.display = 'none';
+                cornerBadge.style.display = 'none';
+            }
+        }
+
         function updateUI() {
+            // === SPREAD 1 (REJESTR) ===
             const reversedData = [...ledgerData].reverse();
             const totalPages = Math.ceil(reversedData.length / entriesPerPage) || 1;
 
@@ -605,6 +672,7 @@
                 inventoryList.appendChild(li);
             }
 
+            // === SPREAD 2 (ZWIERZĘTA) ===
             const animalsListDOM = document.getElementById('animals-list');
             animalsListDOM.innerHTML = '';
             for (const [animal, count] of Object.entries(animals)) {
@@ -613,6 +681,7 @@
                 animalsListDOM.appendChild(li);
             }
 
+            // === SPREAD 2 (NOTATKI) ===
             const totalNotePages = notesData.length || 1;
             if (currentNotePage > totalNotePages) currentNotePage = totalNotePages;
             if (currentNotePage < 1) currentNotePage = 1;
@@ -634,6 +703,9 @@
 
             document.getElementById('btn-prev-note').disabled = currentNotePage === 1 || notesData.length === 0;
             document.getElementById('btn-next-note').disabled = currentNotePage === totalNotePages || notesData.length === 0;
+
+            // Odśwież znaczki powiadomień na koniec!
+            updateNotifications();
         }
     </script>
 </body>
