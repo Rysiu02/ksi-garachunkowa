@@ -70,7 +70,6 @@
             opacity: 0; 
             visibility: hidden;
             z-index: 1; 
-            /* Szybsze znikanie przy zamykaniu */
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
@@ -85,7 +84,6 @@
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
-        /* POPRAWKA: Wydłużone opóźnienie (0.9s), żeby okładka zdążyła opaść */
         .book.open .left-page, 
         .book.open .right-page {
             opacity: 1;
@@ -319,7 +317,7 @@
                 <div class="page-name">Stan Całkowity</div>
                 
                 <div style="margin-top: 10px;">
-                    <h3>Stan Skarbca: <span id="total-money">0 $</span></h3>
+                    <h3>Stan Skarbca: <span id="total-money">0</span> $</h3>
                     <hr style="border: 0; border-top: 1px dashed #8b7355;">
                     <h3>Inwentarz:</h3>
                     <ul class="entry-list" id="inventory-list"></ul>
@@ -338,7 +336,7 @@
             <option value="item_take">Zabrał przedmiot (-)</option>
         </select>
         
-        <input type="text" id="amountOrItem" placeholder="Kwota ($)" required>
+        <input type="text" id="amountOrItem" placeholder="Kwota ($) lub Przedmiot" required>
         
         <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
         
@@ -414,20 +412,29 @@
 
             if (data) {
                 Object.values(data).forEach(entry => {
-                    ledgerData.push(entry);
+                    // Tworzymy kopię wpisu, aby naprawić błędy na obu stronach księgi!
+                    let currentEntry = { ...entry };
+                    let qty = currentEntry.quantity ? parseInt(currentEntry.quantity) : 1;
 
-                    let qty = entry.quantity ? parseInt(entry.quantity) : 1;
+                    // STANDARYZACJA (Działa na wszystko w księdze)
+                    if (currentEntry.action.startsWith('item') && currentEntry.value) {
+                        let standName = String(currentEntry.value).trim();
+                        standName = standName.charAt(0).toUpperCase() + standName.slice(1).toLowerCase();
+                        currentEntry.value = standName; // Podmieniamy nazwę w locie na czystą
+                    }
 
-                    if (entry.action === 'money_add') {
-                        totalMoney += parseFloat(entry.value);
-                    } else if (entry.action === 'money_take') {
-                        totalMoney -= parseFloat(entry.value);
-                    } else if (entry.action === 'item_add') {
-                        inventory[entry.value] = (inventory[entry.value] || 0) + qty;
-                    } else if (entry.action === 'item_take') {
-                        if (inventory[entry.value] && inventory[entry.value] > 0) {
-                            inventory[entry.value] -= qty;
-                            if(inventory[entry.value] <= 0) delete inventory[entry.value];
+                    ledgerData.push(currentEntry);
+
+                    if (currentEntry.action === 'money_add') {
+                        totalMoney += parseFloat(currentEntry.value);
+                    } else if (currentEntry.action === 'money_take') {
+                        totalMoney -= parseFloat(currentEntry.value);
+                    } else if (currentEntry.action === 'item_add') {
+                        inventory[currentEntry.value] = (inventory[currentEntry.value] || 0) + qty;
+                    } else if (currentEntry.action === 'item_take') {
+                        if (inventory[currentEntry.value] && inventory[currentEntry.value] > 0) {
+                            inventory[currentEntry.value] -= qty;
+                            if(inventory[currentEntry.value] <= 0) delete inventory[currentEntry.value];
                         }
                     }
                 });
@@ -505,7 +512,7 @@
             document.getElementById('btn-prev').disabled = currentPage === 1;
             document.getElementById('btn-next').disabled = currentPage === totalPages;
 
-            document.getElementById('total-money').innerText = totalMoney.toFixed(2) + ' $';
+            document.getElementById('total-money').innerText = totalMoney.toFixed(2);
             document.getElementById('total-money').className = totalMoney >= 0 ? 'positive' : 'negative';
 
             const inventoryList = document.getElementById('inventory-list');
