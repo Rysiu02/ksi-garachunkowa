@@ -19,16 +19,13 @@
             min-height: 100vh;
             color: #332;
             box-sizing: border-box;
-            /* Główny kursor: Brązowo-złota strzałka */
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Cpolygon points='2,2 2,22 7,17 12,26 16,24 11,15 20,15' fill='%233e2723' stroke='%23d4af37' stroke-width='1.5'/%3E%3C/svg%3E") 2 2, auto;
         }
 
-        /* Kursor najechania: Celownik rewolweru! */
         .cover, .fold-wrapper, button, select {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='rgba(62,39,35,0.2)' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='6' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='18' x2='12' y2='24' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='0' y1='12' x2='6' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='18' y1='12' x2='24' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b71c1c'/%3E%3C/svg%3E") 12 12, pointer !important;
         }
 
-        /* Pola tekstowe zachowują zwykły kursor dla wygody pisania */
         input, textarea {
             cursor: text;
         }
@@ -132,6 +129,7 @@
             top: 0; 
             width: 60px;
             height: 60px;
+            cursor: pointer;
             z-index: 50;
         }
         .fold-wrapper.top-left { left: 0; }
@@ -178,6 +176,7 @@
             z-index: 20; 
             justify-content: center;
             align-items: center;
+            cursor: pointer;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
             border: 2px solid #1a0f0b;
             backface-visibility: hidden; 
@@ -263,7 +262,9 @@
             .book.open .spread.active { display: flex !important; animation: mobileFade 0.3s ease; }
 
             .page { 
-                position: static !important; width: 100% !important; height: auto !important; min-height: 450px !important; 
+                /* POPRAWKA: Relative jest niezbędne, by rogi trzymały się górnych krawędzi kartek na telefonie! */
+                position: relative !important; 
+                width: 100% !important; height: auto !important; min-height: 450px !important; 
                 border-radius: 10px !important; border: 2px solid #8b7355 !important; display: block !important; 
                 overflow: visible !important; padding-bottom: 25px !important; 
             }
@@ -274,8 +275,6 @@
             .controls { flex-direction: column; align-items: stretch; }
             .controls input, .controls select, .controls button, .controls textarea { width: 100%; box-sizing: border-box; }
             #itemQuantity { width: 100% !important; }
-            
-            .fold-wrapper { display: none !important; } 
         }
     </style>
 </head>
@@ -558,7 +557,6 @@
         }
 
         function updateUI() {
-            // === SPREAD 1 (REJESTR) ===
             const reversedData = [...ledgerData].reverse();
             const totalPages = Math.ceil(reversedData.length / entriesPerPage) || 1;
 
@@ -607,7 +605,6 @@
                 inventoryList.appendChild(li);
             }
 
-            // === SPREAD 2 (ZWIERZĘTA) ===
             const animalsListDOM = document.getElementById('animals-list');
             animalsListDOM.innerHTML = '';
             for (const [animal, count] of Object.entries(animals)) {
@@ -616,7 +613,6 @@
                 animalsListDOM.appendChild(li);
             }
 
-            // === SPREAD 2 (NOTATKI) ===
             const totalNotePages = notesData.length || 1;
             if (currentNotePage > totalNotePages) currentNotePage = totalNotePages;
             if (currentNotePage < 1) currentNotePage = 1;
