@@ -7,6 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
 
+        /* --- NIESTANDARDOWE KURSORY RDR2 --- */
         body {
             margin: 0;
             padding: 10px;
@@ -18,6 +19,18 @@
             min-height: 100vh;
             color: #332;
             box-sizing: border-box;
+            /* Główny kursor: Brązowo-złota strzałka */
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Cpolygon points='2,2 2,22 7,17 12,26 16,24 11,15 20,15' fill='%233e2723' stroke='%23d4af37' stroke-width='1.5'/%3E%3C/svg%3E") 2 2, auto;
+        }
+
+        /* Kursor najechania: Celownik rewolweru! */
+        .cover, .fold-wrapper, button, select {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='rgba(62,39,35,0.2)' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='6' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='18' x2='12' y2='24' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='0' y1='12' x2='6' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='18' y1='12' x2='24' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b71c1c'/%3E%3C/svg%3E") 12 12, pointer !important;
+        }
+
+        /* Pola tekstowe zachowują zwykły kursor dla wygody pisania */
+        input, textarea {
+            cursor: text;
         }
 
         h1, h2, h3 {
@@ -48,6 +61,21 @@
             transform: translateX(0); 
         }
 
+        /* --- SPREADY (ROZKŁADÓWKI) --- */
+        .spread {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; 
+            left: 0;
+            pointer-events: none; 
+            z-index: 1;
+        }
+        .spread.active {
+            pointer-events: auto;
+            z-index: 5;
+        }
+
         .page {
             position: absolute;
             width: 50%;
@@ -69,8 +97,6 @@
             overflow-y: auto;
             opacity: 0; 
             visibility: hidden;
-            z-index: 1; 
-            /* Szybsze znikanie przy zamykaniu */
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
@@ -81,19 +107,66 @@
             overflow-y: auto;
             opacity: 0; 
             visibility: hidden;
-            z-index: 1;
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
-        /* POPRAWKA: Wydłużone opóźnienie (0.9s), żeby okładka zdążyła opaść */
-        .book.open .left-page, 
-        .book.open .right-page {
+        .book.open .spread.active .left-page, 
+        .book.open .spread.active .right-page {
             opacity: 1;
             visibility: visible;
-            z-index: 5; 
+        }
+
+        .book.open:not(.ready) .spread.active .left-page, 
+        .book.open:not(.ready) .spread.active .right-page {
             transition: opacity 0.6s ease 0.9s, visibility 0s 0.9s; 
         }
 
+        .book.ready .spread.active .left-page, 
+        .book.ready .spread.active .right-page {
+            transition: opacity 0.4s ease; 
+        }
+
+        /* --- ZAGIĘTE ROGI (GÓRA) --- */
+        .fold-wrapper {
+            position: absolute;
+            top: 0; 
+            width: 60px;
+            height: 60px;
+            z-index: 50;
+        }
+        .fold-wrapper.top-left { left: 0; }
+        .fold-wrapper.top-right { right: 0; }
+
+        .fold {
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            transition: border-width 0.2s ease, filter 0.2s ease;
+        }
+        
+        .fold-wrapper.top-left .fold {
+            left: 0;
+            border-width: 50px 0 0 50px;
+            border-color: #c8b993 transparent transparent #c8b993;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+        }
+        .fold-wrapper.top-left:hover .fold {
+            border-width: 65px 0 0 65px;
+        }
+
+        .fold-wrapper.top-right .fold {
+            right: 0;
+            border-width: 50px 50px 0 0;
+            border-color: #c8b993 #c8b993 transparent transparent;
+            filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.3));
+        }
+        .fold-wrapper.top-right:hover .fold {
+            border-width: 65px 65px 0 0;
+        }
+
+        /* --- OKŁADKA --- */
         .cover {
             left: 50%;
             width: 50%;
@@ -102,10 +175,9 @@
             border-radius: 0 10px 10px 0;
             transform-origin: left;
             transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
-            z-index: 10; 
+            z-index: 20; 
             justify-content: center;
             align-items: center;
-            cursor: pointer;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
             border: 2px solid #1a0f0b;
             backface-visibility: hidden; 
@@ -126,6 +198,7 @@
             z-index: 0; 
         }
 
+        /* --- PANEL STEROWANIA --- */
         .controls {
             background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
             padding: 15px;
@@ -144,7 +217,7 @@
             margin-bottom: 30px;
         }
 
-        .controls input, .controls select, .controls button {
+        .controls input, .controls select, .controls button, .controls textarea {
             padding: 10px;
             font-family: 'Playfair Display', serif;
             font-size: 14px;
@@ -153,142 +226,56 @@
             border-radius: 3px;
         }
 
-        .controls button {
-            background: #3e2723;
-            color: #fff;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-
+        .controls button { background: #3e2723; color: #fff; font-weight: bold; transition: background 0.2s; }
         .controls button:hover { background: #5d4037; }
-
-        .controls .close-btn-panel {
-            background: #8b2323;
-            border-color: #5c1414;
-        }
-
+        .controls .close-btn-panel { background: #8b2323; border-color: #5c1414; }
         .controls .close-btn-panel:hover { background: #5c1414; }
 
-        .entry-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-family: 'Special Elite', cursive;
-            font-size: 14px;
-            flex-grow: 1;
-        }
-
-        .entry-list li {
-            border-bottom: 1px dashed #8b7355;
-            padding: 8px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-
+        .entry-list { list-style: none; padding: 0; margin: 0; font-family: 'Special Elite', cursive; font-size: 14px; flex-grow: 1; }
+        .entry-list li { border-bottom: 1px dashed #8b7355; padding: 8px 0; display: flex; justify-content: space-between; }
         .positive { color: #1b5e20; font-weight: bold; }
         .negative { color: #b71c1c; font-weight: bold; }
 
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 2px solid #8b7355;
-            font-family: 'Special Elite', cursive;
-            font-size: 14px;
-        }
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 2px solid #8b7355; font-family: 'Special Elite', cursive; font-size: 14px; }
+        .pagination button { background: transparent; border: none; color: #3e2723; font-family: 'Special Elite', cursive; font-weight: bold; text-decoration: underline; padding: 5px; }
+        .pagination button:disabled { color: #aaa; cursor: not-allowed; text-decoration: none; }
 
-        .pagination button {
-            background: transparent;
-            border: none;
-            color: #3e2723;
-            font-family: 'Special Elite', cursive;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: underline;
-            padding: 5px;
-        }
-
-        .pagination button:disabled {
-            color: #aaa;
-            cursor: not-allowed;
-            text-decoration: none;
-        }
-
-        .page-name {
-            text-align: center;
-            font-style: italic;
-            color: #5d4037;
-            margin-bottom: 15px;
-            font-size: 14px;
-            border-bottom: 1px solid #8b7355;
-            padding-bottom: 5px;
-        }
-
+        .page-name { text-align: center; font-style: italic; color: #5d4037; margin-bottom: 15px; font-size: 14px; border-bottom: 1px solid #8b7355; padding-bottom: 5px; }
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
 
-        @media (max-width: 850px) {
-            .scene { 
-                height: auto !important; 
-                margin-top: 10px;
-            }
-            .book { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 20px; 
-                height: auto !important; 
-                transform: translateX(0) !important; 
-            }
-            .book.open {
-                transform: translateX(0) !important;
-            }
-            .page { 
-                position: static; 
-                width: 100%; 
-                height: auto !important; 
-                min-height: 450px; 
-                border-radius: 10px !important; 
-                border: 2px solid #8b7355 !important;
-                display: block !important; 
-                overflow: visible !important; 
-                padding-bottom: 25px !important; 
-            }
-            
-            .cover { 
-                position: static; 
-                height: 300px !important; 
-                display: flex !important; 
-            }
-            
-            .left-page, .right-page { 
-                display: none !important; 
-                opacity: 1 !important; 
-                visibility: visible !important;
-            }
-            
-            .book.open .left-page, .book.open .right-page { 
-                display: block !important; 
-                opacity: 1 !important; 
-                visibility: visible !important;
-            }
-            .book.open .cover { 
-                display: none !important; 
-            }
+        @keyframes mobileFade { from { opacity: 0; } to { opacity: 1; } }
 
-            .controls {
+        /* --- WERSJA MOBILNA --- */
+        @media (max-width: 850px) {
+            .scene { height: auto !important; margin-top: 10px; }
+            .book { display: flex; flex-direction: column; gap: 20px; height: auto !important; transform: translateX(0) !important; }
+            .book.open { transform: translateX(0) !important; }
+            
+            .spread {
+                position: relative !important;
+                display: none !important;
                 flex-direction: column;
-                align-items: stretch;
+                gap: 20px;
+                width: 100% !important;
+                height: auto !important;
             }
-            .controls input, .controls select, .controls button {
-                width: 100%;
-                box-sizing: border-box; 
+            .book.open .spread.active { display: flex !important; animation: mobileFade 0.3s ease; }
+
+            .page { 
+                position: static !important; width: 100% !important; height: auto !important; min-height: 450px !important; 
+                border-radius: 10px !important; border: 2px solid #8b7355 !important; display: block !important; 
+                overflow: visible !important; padding-bottom: 25px !important; 
             }
-            #itemQuantity {
-                width: 100% !important; 
-            }
+            .cover { position: static !important; height: 300px !important; display: flex !important; }
+            .left-page, .right-page { display: block !important; opacity: 1 !important; visibility: visible !important; }
+            .book.open .cover { display: none !important; }
+
+            .controls { flex-direction: column; align-items: stretch; }
+            .controls input, .controls select, .controls button, .controls textarea { width: 100%; box-sizing: border-box; }
+            #itemQuantity { width: 100% !important; }
+            
+            .fold-wrapper { display: none !important; } 
         }
     </style>
 </head>
@@ -301,30 +288,66 @@
                 <p style="color: #ccc; font-style: italic;">(Kliknij, aby otworzyć)</p>
             </div>
 
-            <div class="page left-page">
-                <h2>Rejestr Działań</h2>
-                <div class="page-name" id="left-page-name">Księga Główna - Strona 1</div>
-                
-                <ul class="entry-list" id="ledger-entries"></ul>
+            <div class="spread active" id="spread-1">
+                <div class="page left-page">
+                    <h2>Rejestr Działań</h2>
+                    <div class="page-name" id="left-page-name">Księga Główna - Strona 1</div>
+                    <ul class="entry-list" id="ledger-entries"></ul>
+                    <div class="pagination">
+                        <button id="btn-prev" onclick="changePage(-1)">&#8592; Poprzednia</button>
+                        <span id="page-indicator">1 / 1</span>
+                        <button id="btn-next" onclick="changePage(1)">Następna &#8594;</button>
+                    </div>
+                </div>
 
-                <div class="pagination">
-                    <button id="btn-prev" onclick="changePage(-1)">&#8592; Poprzednia</button>
-                    <span id="page-indicator">1 / 1</span>
-                    <button id="btn-next" onclick="changePage(1)">Następna &#8594;</button>
+                <div class="page right-page">
+                    <div class="fold-wrapper top-right" onclick="switchSpread(2)" title="Przewróć kartkę">
+                        <div class="fold"></div>
+                    </div>
+
+                    <h2>Podsumowanie Rancha</h2>
+                    <div class="page-name">Stan Całkowity</div>
+                    <div style="margin-top: 10px;">
+                        <h3>Stan Skarbca: <span id="total-money">0</span> $</h3>
+                        <hr style="border: 0; border-top: 1px dashed #8b7355;">
+                        <h3>Inwentarz:</h3>
+                        <ul class="entry-list" id="inventory-list"></ul>
+                    </div>
                 </div>
             </div>
 
-            <div class="page right-page">
-                <h2>Podsumowanie Rancha</h2>
-                <div class="page-name">Stan Całkowity</div>
+            <div class="spread" id="spread-2">
                 
-                <div style="margin-top: 10px;">
-                    <h3>Stan Skarbca: <span id="total-money">0 $</span></h3>
-                    <hr style="border: 0; border-top: 1px dashed #8b7355;">
-                    <h3>Inwentarz:</h3>
-                    <ul class="entry-list" id="inventory-list"></ul>
+                <div class="page left-page">
+                    <div class="fold-wrapper top-left" onclick="switchSpread(1)" title="Wróć do księgi głównej">
+                        <div class="fold"></div>
+                    </div>
+
+                    <h2>Notatki</h2>
+                    <div class="page-name" id="note-page-indicator">Pusta strona</div>
+                    
+                    <div id="note-display" style="flex-grow: 1; margin-top: 15px; font-family: 'Special Elite', cursive; font-size: 16px; white-space: pre-wrap; overflow-y: auto;">
+                        Brak notatek.
+                    </div>
+                    
+                    <div id="note-author" style="text-align: right; font-style: italic; color: #5d4037; margin-top: 10px; font-family: 'Playfair Display', serif;">
+                    </div>
+
+                    <div class="pagination">
+                        <button id="btn-prev-note" onclick="changeNotePage(-1)">&#8592; Poprzednia</button>
+                        <button id="btn-next-note" onclick="changeNotePage(1)">Następna &#8594;</button>
+                    </div>
+                </div>
+
+                <div class="page right-page">
+                    <h2>Zwierzęta</h2>
+                    <div class="page-name">Inwentarz Żywy</div>
+                    <div style="margin-top: 10px;">
+                        <ul class="entry-list" id="animals-list"></ul>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -336,9 +359,13 @@
             <option value="money_take">Zabrał gotówkę (-)</option>
             <option value="item_add">Przyniósł przedmiot (+)</option>
             <option value="item_take">Zabrał przedmiot (-)</option>
+            <option value="animal_add">Wprowadził zwierzę (+)</option>
+            <option value="animal_take">Wyprowadził zwierzę (-)</option>
+            <option value="note_add">Napisz notatkę (Zapis w Dzienniku)</option> 
         </select>
         
-        <input type="text" id="amountOrItem" placeholder="Kwota ($)" required>
+        <input type="text" id="amountOrItem" placeholder="Kwota ($) lub Przedmiot" required>
+        <textarea id="noteTextarea" placeholder="Treść notatki..." rows="1" style="display: none; width: 250px; resize: vertical;"></textarea>
         
         <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
         
@@ -367,18 +394,21 @@
         const database = firebase.database();
 
         let ledgerData = [];
+        let notesData = []; 
         let totalMoney = 0;
         let inventory = {};
+        let animals = {}; 
         
         let currentPage = 1;
         const entriesPerPage = 7;
+        let currentNotePage = 1; 
 
         function openBook() {
             document.getElementById('book').classList.add('open');
             setTimeout(() => {
+                document.getElementById('book').classList.add('ready');
                 document.getElementById('controls').style.display = 'flex';
                 toggleQuantityField(); 
-                
                 if (window.innerWidth <= 850) {
                     document.getElementById('controls').scrollIntoView({ behavior: 'smooth' });
                 }
@@ -387,21 +417,41 @@
 
         function closeBook() {
             document.getElementById('book').classList.remove('open');
+            document.getElementById('book').classList.remove('ready');
             document.getElementById('controls').style.display = 'none';
+            switchSpread(1); 
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchSpread(spreadId) {
+            document.querySelectorAll('.spread').forEach(s => s.classList.remove('active'));
+            document.getElementById('spread-' + spreadId).classList.add('active');
+            
+            if (window.innerWidth <= 850 && document.getElementById('book').classList.contains('open')) {
+                document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         function toggleQuantityField() {
             const action = document.getElementById('actionType').value;
             const amountInput = document.getElementById('amountOrItem');
             const qtyInput = document.getElementById('itemQuantity');
+            const noteInput = document.getElementById('noteTextarea');
             
-            if(action.startsWith('item')) {
-                amountInput.placeholder = "Nazwa przedmiotu";
+            if (action === 'note_add') {
+                amountInput.style.display = 'none';
+                qtyInput.style.display = 'none';
+                noteInput.style.display = ''; 
+            } else if(action.startsWith('item') || action.startsWith('animal')) {
+                amountInput.style.display = '';
+                amountInput.placeholder = action.startsWith('animal') ? "Nazwa zwierzęcia" : "Nazwa przedmiotu";
                 qtyInput.style.display = window.innerWidth <= 850 ? 'block' : 'inline-block';
+                noteInput.style.display = 'none';
             } else {
+                amountInput.style.display = '';
                 amountInput.placeholder = "Kwota ($)";
                 qtyInput.style.display = 'none';
+                noteInput.style.display = 'none';
             }
         }
 
@@ -409,25 +459,45 @@
             const data = snapshot.val();
             
             ledgerData = [];
+            notesData = []; 
             totalMoney = 0;
             inventory = {};
+            animals = {}; 
 
             if (data) {
                 Object.values(data).forEach(entry => {
-                    ledgerData.push(entry);
+                    let currentEntry = { ...entry };
+                    let qty = currentEntry.quantity ? parseInt(currentEntry.quantity) : 1;
 
-                    let qty = entry.quantity ? parseInt(entry.quantity) : 1;
+                    if (currentEntry.action === 'note_add') {
+                        notesData.push(currentEntry);
+                    } else {
+                        if ((currentEntry.action.startsWith('item') || currentEntry.action.startsWith('animal')) && currentEntry.value) {
+                            let standName = String(currentEntry.value).trim();
+                            standName = standName.charAt(0).toUpperCase() + standName.slice(1).toLowerCase();
+                            currentEntry.value = standName; 
+                        }
 
-                    if (entry.action === 'money_add') {
-                        totalMoney += parseFloat(entry.value);
-                    } else if (entry.action === 'money_take') {
-                        totalMoney -= parseFloat(entry.value);
-                    } else if (entry.action === 'item_add') {
-                        inventory[entry.value] = (inventory[entry.value] || 0) + qty;
-                    } else if (entry.action === 'item_take') {
-                        if (inventory[entry.value] && inventory[entry.value] > 0) {
-                            inventory[entry.value] -= qty;
-                            if(inventory[entry.value] <= 0) delete inventory[entry.value];
+                        ledgerData.push(currentEntry);
+
+                        if (currentEntry.action === 'money_add') {
+                            totalMoney += parseFloat(currentEntry.value);
+                        } else if (currentEntry.action === 'money_take') {
+                            totalMoney -= parseFloat(currentEntry.value);
+                        } else if (currentEntry.action === 'item_add') {
+                            inventory[currentEntry.value] = (inventory[currentEntry.value] || 0) + qty;
+                        } else if (currentEntry.action === 'item_take') {
+                            if (inventory[currentEntry.value] && inventory[currentEntry.value] > 0) {
+                                inventory[currentEntry.value] -= qty;
+                                if(inventory[currentEntry.value] <= 0) delete inventory[currentEntry.value];
+                            }
+                        } else if (currentEntry.action === 'animal_add') {
+                            animals[currentEntry.value] = (animals[currentEntry.value] || 0) + qty;
+                        } else if (currentEntry.action === 'animal_take') {
+                            if (animals[currentEntry.value] && animals[currentEntry.value] > 0) {
+                                animals[currentEntry.value] -= qty;
+                                if(animals[currentEntry.value] <= 0) delete animals[currentEntry.value];
+                            }
                         }
                     }
                 });
@@ -438,17 +508,22 @@
         function addEntry() {
             const name = document.getElementById('personName').value;
             const action = document.getElementById('actionType').value;
-            const value = document.getElementById('amountOrItem').value;
+            let value = "";
             let quantity = 1;
             
-            if(action.startsWith('item')) {
-                quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+            if(action === 'note_add') {
+                value = document.getElementById('noteTextarea').value;
+            } else {
+                value = document.getElementById('amountOrItem').value;
+                if(action.startsWith('item') || action.startsWith('animal')) {
+                    quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+                }
             }
 
             const date = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
 
             if (!name || !value) {
-                alert("Wpisz imię i kwotę/przedmiot, kowboju!");
+                alert("Wpisz imię i wartość wpisu, kowboju!");
                 return;
             }
 
@@ -456,8 +531,16 @@
             database.ref('wspolna_ksiega').push(entry);
             
             document.getElementById('amountOrItem').value = '';
+            document.getElementById('noteTextarea').value = '';
             document.getElementById('itemQuantity').value = '1';
-            currentPage = 1; 
+            
+            if (action === 'note_add') {
+                currentNotePage = notesData.length + 1; 
+                switchSpread(2);
+            } else {
+                currentPage = 1; 
+                switchSpread(1); 
+            }
             
             if (window.innerWidth <= 850) {
                  document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
@@ -469,7 +552,13 @@
             updateUI();
         }
 
+        function changeNotePage(direction) {
+            currentNotePage += direction;
+            updateUI();
+        }
+
         function updateUI() {
+            // === SPREAD 1 (REJESTR) ===
             const reversedData = [...ledgerData].reverse();
             const totalPages = Math.ceil(reversedData.length / entriesPerPage) || 1;
 
@@ -492,8 +581,10 @@
                 switch(entry.action) {
                     case 'money_add': actionText = `wpłacił(a) ${entry.value}$`; colorClass = 'positive'; break;
                     case 'money_take': actionText = `zabrał(a) ${entry.value}$`; colorClass = 'negative'; break;
-                    case 'item_add': actionText = `przyniósł/niosła: ${entry.value} (x${qty})`; colorClass = 'positive'; break;
+                    case 'item_add': actionText = `przyniósł(a): ${entry.value} (x${qty})`; colorClass = 'positive'; break;
                     case 'item_take': actionText = `zabrał(a): ${entry.value} (x${qty})`; colorClass = 'negative'; break;
+                    case 'animal_add': actionText = `przyprowadził(a): ${entry.value} (x${qty})`; colorClass = 'positive'; break;
+                    case 'animal_take': actionText = `wyprowadził(a): ${entry.value} (x${qty})`; colorClass = 'negative'; break;
                 }
 
                 li.innerHTML = `<span>[${entry.date}] <b>${entry.name}</b></span> <span class="${colorClass}">${actionText}</span>`;
@@ -505,7 +596,7 @@
             document.getElementById('btn-prev').disabled = currentPage === 1;
             document.getElementById('btn-next').disabled = currentPage === totalPages;
 
-            document.getElementById('total-money').innerText = totalMoney.toFixed(2) + ' $';
+            document.getElementById('total-money').innerText = totalMoney.toFixed(2);
             document.getElementById('total-money').className = totalMoney >= 0 ? 'positive' : 'negative';
 
             const inventoryList = document.getElementById('inventory-list');
@@ -515,6 +606,38 @@
                 li.innerHTML = `<span>${item}</span> <span>x${count}</span>`;
                 inventoryList.appendChild(li);
             }
+
+            // === SPREAD 2 (ZWIERZĘTA) ===
+            const animalsListDOM = document.getElementById('animals-list');
+            animalsListDOM.innerHTML = '';
+            for (const [animal, count] of Object.entries(animals)) {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${animal}</span> <span>x${count}</span>`;
+                animalsListDOM.appendChild(li);
+            }
+
+            // === SPREAD 2 (NOTATKI) ===
+            const totalNotePages = notesData.length || 1;
+            if (currentNotePage > totalNotePages) currentNotePage = totalNotePages;
+            if (currentNotePage < 1) currentNotePage = 1;
+
+            const noteDisplay = document.getElementById('note-display');
+            const noteAuthor = document.getElementById('note-author');
+            const noteIndicator = document.getElementById('note-page-indicator');
+
+            if (notesData.length > 0) {
+                const note = notesData[currentNotePage - 1];
+                noteDisplay.innerText = note.value;
+                noteAuthor.innerHTML = `~ ${note.name}<br><span style="font-size: 12px; color: #8b7355;">${note.date}</span>`;
+                noteIndicator.innerText = `Wpis nr ${currentNotePage} z ${totalNotePages}`;
+            } else {
+                noteDisplay.innerText = "Brak wpisów w dzienniku. Napisz coś od siebie!";
+                noteAuthor.innerHTML = "";
+                noteIndicator.innerText = "Pusta strona";
+            }
+
+            document.getElementById('btn-prev-note').disabled = currentNotePage === 1 || notesData.length === 0;
+            document.getElementById('btn-next-note').disabled = currentNotePage === totalNotePages || notesData.length === 0;
         }
     </script>
 </body>
