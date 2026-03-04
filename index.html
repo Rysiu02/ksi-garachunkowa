@@ -26,239 +26,73 @@
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='rgba(62,39,35,0.2)' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='6' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='18' x2='12' y2='24' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='0' y1='12' x2='6' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='18' y1='12' x2='24' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b71c1c'/%3E%3C/svg%3E") 12 12, pointer !important;
         }
 
-        input, textarea {
-            cursor: text;
-        }
+        input, textarea { cursor: text; }
 
-        h1, h2, h3 {
-            text-align: center;
-            margin-top: 0;
-            color: #2b1a10;
-        }
+        h1, h2, h3 { text-align: center; margin-top: 0; color: #2b1a10; }
 
-        .scene {
-            width: 100%;
-            max-width: 800px;
-            height: 550px;
-            perspective: 1500px;
-            margin-top: 20px;
-            position: relative;
-        }
+        .scene { width: 100%; max-width: 800px; height: 550px; perspective: 1500px; margin-top: 20px; position: relative; }
 
-        .book {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
-            transform: translateX(-25%); 
-        }
-
-        .book.open {
-            transform: translateX(0); 
-        }
+        .book { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1); transform: translateX(-25%); }
+        .book.open { transform: translateX(0); }
 
         /* --- POWIADOMIENIA (SYSTEM ZNACZKÓW) --- */
         .notification-badge {
-            position: absolute;
-            background: #b71c1c;
-            color: #fff;
-            font-family: 'Special Elite', cursive;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            border: 2px solid #1a0f0b;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            display: none;
-            z-index: 100;
-            pointer-events: none; /* Nie blokuje kliknięć pod spodem */
-            animation: pulseBadge 1.5s infinite;
+            position: absolute; background: #b71c1c; color: #fff; font-family: 'Special Elite', cursive; font-size: 12px;
+            padding: 4px 8px; border-radius: 12px; border: 2px solid #1a0f0b; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            display: none; z-index: 100; pointer-events: none; animation: pulseBadge 1.5s infinite;
         }
 
-        @keyframes pulseBadge {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulseBadge { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        #note-badge-cover {
-            top: 20px;
-            right: 20px;
-        }
-
-        #note-badge-corner {
-            top: 15px;
-            right: 50px;
-            white-space: nowrap;
-        }
+        #note-badge-cover { top: 20px; right: 20px; }
+        #note-badge-corner { top: 15px; right: 50px; white-space: nowrap; }
 
         /* --- SPREADY (ROZKŁADÓWKI) --- */
-        .spread {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0; 
-            left: 0;
-            pointer-events: none; 
-            z-index: 1;
-        }
-        .spread.active {
-            pointer-events: auto;
-            z-index: 5;
-        }
+        .spread { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 1; }
+        .spread.active { pointer-events: auto; z-index: 5; }
 
         .page {
-            position: absolute;
-            width: 50%;
-            height: 100%;
-            top: 0;
-            padding: 25px;
-            box-sizing: border-box;
+            position: absolute; width: 50%; height: 100%; top: 0; padding: 25px; box-sizing: border-box;
             background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 5px 5px 15px rgba(0,0,0,0.8);
-            border: 1px solid #c2b280;
-            display: flex;
-            flex-direction: column;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 5px 5px 15px rgba(0,0,0,0.8); border: 1px solid #c2b280;
+            display: flex; flex-direction: column;
         }
 
-        .left-page {
-            left: 0;
-            border-radius: 10px 0 0 10px;
-            border-right: 2px solid #8b7355;
-            overflow-y: auto;
-            opacity: 0; 
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s;
-        }
+        .left-page { left: 0; border-radius: 10px 0 0 10px; border-right: 2px solid #8b7355; overflow-y: auto; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+        .right-page { right: 0; border-radius: 0 10px 10px 0; border-left: 2px solid #8b7355; overflow-y: auto; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
 
-        .right-page {
-            right: 0;
-            border-radius: 0 10px 10px 0;
-            border-left: 2px solid #8b7355;
-            overflow-y: auto;
-            opacity: 0; 
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s;
-        }
-
-        .book.open .spread.active .left-page, 
-        .book.open .spread.active .right-page {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .book.open:not(.ready) .spread.active .left-page, 
-        .book.open:not(.ready) .spread.active .right-page {
-            transition: opacity 0.6s ease 0.9s, visibility 0s 0.9s; 
-        }
-
-        .book.ready .spread.active .left-page, 
-        .book.ready .spread.active .right-page {
-            transition: opacity 0.4s ease; 
-        }
+        .book.open .spread.active .left-page, .book.open .spread.active .right-page { opacity: 1; visibility: visible; }
+        .book.open:not(.ready) .spread.active .left-page, .book.open:not(.ready) .spread.active .right-page { transition: opacity 0.6s ease 0.9s, visibility 0s 0.9s; }
+        .book.ready .spread.active .left-page, .book.ready .spread.active .right-page { transition: opacity 0.4s ease; }
 
         /* --- ZAGIĘTE ROGI (GÓRA) --- */
-        .fold-wrapper {
-            position: absolute;
-            top: 0; 
-            width: 60px;
-            height: 60px;
-            cursor: pointer;
-            z-index: 50;
-        }
+        .fold-wrapper { position: absolute; top: 0; width: 60px; height: 60px; cursor: pointer; z-index: 50; }
         .fold-wrapper.top-left { left: 0; }
         .fold-wrapper.top-right { right: 0; }
-
-        .fold {
-            position: absolute;
-            top: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            transition: border-width 0.2s ease, filter 0.2s ease;
-        }
+        .fold { position: absolute; top: 0; width: 0; height: 0; border-style: solid; transition: border-width 0.2s ease, filter 0.2s ease; }
         
-        .fold-wrapper.top-left .fold {
-            left: 0;
-            border-width: 50px 0 0 50px;
-            border-color: #c8b993 transparent transparent #c8b993;
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
-        }
-        .fold-wrapper.top-left:hover .fold {
-            border-width: 65px 0 0 65px;
-        }
-
-        .fold-wrapper.top-right .fold {
-            right: 0;
-            border-width: 50px 50px 0 0;
-            border-color: #c8b993 #c8b993 transparent transparent;
-            filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.3));
-        }
-        .fold-wrapper.top-right:hover .fold {
-            border-width: 65px 65px 0 0;
-        }
+        .fold-wrapper.top-left .fold { left: 0; border-width: 50px 0 0 50px; border-color: #c8b993 transparent transparent #c8b993; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); }
+        .fold-wrapper.top-left:hover .fold { border-width: 65px 0 0 65px; }
+        .fold-wrapper.top-right .fold { right: 0; border-width: 50px 50px 0 0; border-color: #c8b993 #c8b993 transparent transparent; filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.3)); }
+        .fold-wrapper.top-right:hover .fold { border-width: 65px 65px 0 0; }
 
         /* --- OKŁADKA --- */
         .cover {
-            left: 50%;
-            width: 50%;
-            background: #3e2723 url('https://www.transparenttextures.com/patterns/leather.png');
-            color: #d4af37;
-            border-radius: 0 10px 10px 0;
-            transform-origin: left;
-            transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
-            z-index: 20; 
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
-            border: 2px solid #1a0f0b;
-            backface-visibility: hidden; 
-            -webkit-backface-visibility: hidden;
+            left: 50%; width: 50%; background: #3e2723 url('https://www.transparenttextures.com/patterns/leather.png');
+            color: #d4af37; border-radius: 0 10px 10px 0; transform-origin: left; transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+            z-index: 20; justify-content: center; align-items: center; cursor: pointer; box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
+            border: 2px solid #1a0f0b; backface-visibility: hidden; -webkit-backface-visibility: hidden;
         }
-
-        .cover h1 {
-            font-family: 'Special Elite', cursive;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 4px #000;
-            text-align: center;
-        }
-
-        .book.open .cover {
-            transform: rotateY(-180deg);
-            pointer-events: none;
-            z-index: 0; 
-        }
+        .cover h1 { font-family: 'Special Elite', cursive; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px #000; text-align: center; }
+        .book.open .cover { transform: rotateY(-180deg); pointer-events: none; z-index: 0; }
 
         /* --- PANEL STEROWANIA --- */
         .controls {
-            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
-            padding: 15px;
-            margin-top: 30px;
-            border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 800px;
-            box-sizing: border-box;
-            display: none;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #8b7355;
-            margin-bottom: 30px;
+            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png'); padding: 15px; margin-top: 30px;
+            border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); width: 100%; max-width: 800px; box-sizing: border-box;
+            display: none; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; border: 2px solid #8b7355; margin-bottom: 30px;
         }
-
-        .controls input, .controls select, .controls button, .controls textarea {
-            padding: 10px;
-            font-family: 'Playfair Display', serif;
-            font-size: 14px;
-            background: rgba(255,255,255,0.7);
-            border: 1px solid #8b7355;
-            border-radius: 3px;
-        }
-
+        .controls input, .controls select, .controls button, .controls textarea { padding: 10px; font-family: 'Playfair Display', serif; font-size: 14px; background: rgba(255,255,255,0.7); border: 1px solid #8b7355; border-radius: 3px; }
         .controls button { background: #3e2723; color: #fff; font-weight: bold; transition: background 0.2s; }
         .controls button:hover { background: #5d4037; }
         .controls .close-btn-panel { background: #8b2323; border-color: #5c1414; }
@@ -272,7 +106,6 @@
         .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 2px solid #8b7355; font-family: 'Special Elite', cursive; font-size: 14px; }
         .pagination button { background: transparent; border: none; color: #3e2723; font-family: 'Special Elite', cursive; font-weight: bold; text-decoration: underline; padding: 5px; }
         .pagination button:disabled { color: #aaa; cursor: not-allowed; text-decoration: none; }
-
         .page-name { text-align: center; font-style: italic; color: #5d4037; margin-bottom: 15px; font-size: 14px; border-bottom: 1px solid #8b7355; padding-bottom: 5px; }
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
@@ -284,26 +117,12 @@
             .scene { height: auto !important; margin-top: 10px; }
             .book { display: flex; flex-direction: column; gap: 20px; height: auto !important; transform: translateX(0) !important; }
             .book.open { transform: translateX(0) !important; }
-            
-            .spread {
-                position: relative !important;
-                display: none !important;
-                flex-direction: column;
-                gap: 20px;
-                width: 100% !important;
-                height: auto !important;
-            }
+            .spread { position: relative !important; display: none !important; flex-direction: column; gap: 20px; width: 100% !important; height: auto !important; }
             .book.open .spread.active { display: flex !important; animation: mobileFade 0.3s ease; }
-
-            .page { 
-                position: relative !important; width: 100% !important; height: auto !important; min-height: 450px !important; 
-                border-radius: 10px !important; border: 2px solid #8b7355 !important; display: block !important; 
-                overflow: visible !important; padding-bottom: 25px !important; 
-            }
+            .page { position: relative !important; width: 100% !important; height: auto !important; min-height: 450px !important; border-radius: 10px !important; border: 2px solid #8b7355 !important; display: block !important; overflow: visible !important; padding-bottom: 25px !important; }
             .cover { position: static !important; height: 300px !important; display: flex !important; }
             .left-page, .right-page { display: block !important; opacity: 1 !important; visibility: visible !important; }
             .book.open .cover { display: none !important; }
-
             .controls { flex-direction: column; align-items: stretch; }
             .controls input, .controls select, .controls button, .controls textarea { width: 100%; box-sizing: border-box; }
             #itemQuantity { width: 100% !important; }
@@ -316,7 +135,6 @@
         <div class="book" id="book">
             <div class="page cover" id="cover" onclick="openBook()">
                 <div class="notification-badge" id="note-badge-cover">Nowa!</div>
-                
                 <h1>Księga Rancha</h1>
                 <p style="color: #ccc; font-style: italic;">(Kliknij, aby otworzyć)</p>
             </div>
@@ -338,7 +156,6 @@
                         <div class="notification-badge" id="note-badge-corner">Nowa notatka!</div>
                         <div class="fold"></div>
                     </div>
-
                     <h2>Podsumowanie Rancha</h2>
                     <div class="page-name">Stan Całkowity</div>
                     <div style="margin-top: 10px;">
@@ -351,22 +168,17 @@
             </div>
 
             <div class="spread" id="spread-2">
-                
                 <div class="page left-page">
                     <div class="fold-wrapper top-left" onclick="switchSpread(1)" title="Wróć do księgi głównej">
                         <div class="fold"></div>
                     </div>
-
                     <h2>Notatki</h2>
                     <div class="page-name" id="note-page-indicator">Pusta strona</div>
-                    
                     <div id="note-display" style="flex-grow: 1; margin-top: 15px; font-family: 'Special Elite', cursive; font-size: 16px; white-space: pre-wrap; overflow-y: auto;">
                         Brak notatek.
                     </div>
-                    
                     <div id="note-author" style="text-align: right; font-style: italic; color: #5d4037; margin-top: 10px; font-family: 'Playfair Display', serif;">
                     </div>
-
                     <div class="pagination">
                         <button id="btn-prev-note" onclick="changeNotePage(-1)">&#8592; Poprzednia</button>
                         <button id="btn-next-note" onclick="changeNotePage(1)">Następna &#8594;</button>
@@ -381,13 +193,11 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <div class="controls" id="controls">
         <input type="text" id="personName" placeholder="Kto? (np. Arthur)" required>
-        
         <select id="actionType" onchange="toggleQuantityField()">
             <option value="money_add">Wpłacił gotówkę (+)</option>
             <option value="money_take">Zabrał gotówkę (-)</option>
@@ -397,12 +207,9 @@
             <option value="animal_take">Wyprowadził zwierzę (-)</option>
             <option value="note_add">Napisz notatkę (Zapis w Dzienniku)</option> 
         </select>
-        
         <input type="text" id="amountOrItem" placeholder="Kwota ($) lub Przedmiot" required>
         <textarea id="noteTextarea" placeholder="Treść notatki..." rows="1" style="display: none; width: 250px; resize: vertical;"></textarea>
-        
         <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
-        
         <button onclick="addEntry()">Zapisz wpis</button>
         <button onclick="closeBook()" class="close-btn-panel">✖ Zamknij Księgę</button>
     </div>
@@ -437,7 +244,25 @@
         const entriesPerPage = 7;
         let currentNotePage = 1; 
 
+        // ==========================================
+        // DŹWIĘKI OBOZOWE 
+        // Upewnij się, że pliki mają takie same nazwy na Twoim GitHubie!
+        // ==========================================
+        const soundOpen = new Audio('otwieranie.mp3'); 
+        const soundPage = new Audio('papier.mp3');
+        const soundCoins = new Audio('monety.mp3');
+        const soundPen = new Audio('pioro.mp3');
+
+        soundOpen.volume = 0.8;
+        soundPage.volume = 0.6;
+        soundCoins.volume = 0.5;
+        soundPen.volume = 0.7;
+
         function openBook() {
+            // Odtworzenie uderzenia okładki
+            soundOpen.currentTime = 0;
+            soundOpen.play().catch(e => console.log("Czekam na interakcję z dźwiękiem..."));
+
             document.getElementById('book').classList.add('open');
             setTimeout(() => {
                 document.getElementById('book').classList.add('ready');
@@ -458,20 +283,20 @@
         }
 
         function switchSpread(spreadId) {
+            // Odtwarzanie dźwięku papieru przy zmianie stron
+            soundPage.currentTime = 0;
+            soundPage.play().catch(e => console.log("Brak dźwięku"));
+
             document.querySelectorAll('.spread').forEach(s => s.classList.remove('active'));
             document.getElementById('spread-' + spreadId).classList.add('active');
             
-            // SYSTEM POWIADOMIEŃ: Resetowanie licznika po wejściu w Notatki
             if (spreadId === 2) {
                 let seenNotes = parseInt(localStorage.getItem('seenNotesCount')) || 0;
-                
-                // Jeśli są nowe notatki, przenieś użytkownika od razu do najnowszej!
                 if (notesData.length > seenNotes) {
                     currentNotePage = notesData.length; 
                 }
-                
                 localStorage.setItem('seenNotesCount', notesData.length);
-                updateUI(); // Odśwież UI, żeby schować znaczki i pokazać najnowszą stronę
+                updateUI(); 
             }
 
             if (window.innerWidth <= 850 && document.getElementById('book').classList.contains('open')) {
@@ -560,10 +385,18 @@
             
             if(action === 'note_add') {
                 value = document.getElementById('noteTextarea').value;
+                // Dźwięk pióra
+                soundPen.currentTime = 0;
+                soundPen.play().catch(e => console.log("Brak dźwięku"));
             } else {
                 value = document.getElementById('amountOrItem').value;
                 if(action.startsWith('item') || action.startsWith('animal')) {
                     quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+                }
+                if(action === 'money_add') {
+                    // Dźwięk monet
+                    soundCoins.currentTime = 0;
+                    soundCoins.play().catch(e => console.log("Brak dźwięku"));
                 }
             }
 
@@ -604,7 +437,6 @@
             updateUI();
         }
 
-        // Funkcja sterująca czerwonymi znaczkami powiadomień
         function updateNotifications() {
             let seenNotes = parseInt(localStorage.getItem('seenNotesCount')) || 0;
             let coverBadge = document.getElementById('note-badge-cover');
@@ -623,7 +455,6 @@
         }
 
         function updateUI() {
-            // === SPREAD 1 (REJESTR) ===
             const reversedData = [...ledgerData].reverse();
             const totalPages = Math.ceil(reversedData.length / entriesPerPage) || 1;
 
@@ -672,7 +503,6 @@
                 inventoryList.appendChild(li);
             }
 
-            // === SPREAD 2 (ZWIERZĘTA) ===
             const animalsListDOM = document.getElementById('animals-list');
             animalsListDOM.innerHTML = '';
             for (const [animal, count] of Object.entries(animals)) {
@@ -681,7 +511,6 @@
                 animalsListDOM.appendChild(li);
             }
 
-            // === SPREAD 2 (NOTATKI) ===
             const totalNotePages = notesData.length || 1;
             if (currentNotePage > totalNotePages) currentNotePage = totalNotePages;
             if (currentNotePage < 1) currentNotePage = 1;
@@ -704,7 +533,6 @@
             document.getElementById('btn-prev-note').disabled = currentNotePage === 1 || notesData.length === 0;
             document.getElementById('btn-next-note').disabled = currentNotePage === totalNotePages || notesData.length === 0;
 
-            // Odśwież znaczki powiadomień na koniec!
             updateNotifications();
         }
     </script>
