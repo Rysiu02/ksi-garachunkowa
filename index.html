@@ -9,52 +9,50 @@
 
         /* --- NIESTANDARDOWE KURSORY RDR2 --- */
         body {
-            margin: 0;
-            padding: 10px;
+            margin: 0; padding: 10px;
             background: #2b1d14 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
-            font-family: 'Playfair Display', serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            color: #332;
-            box-sizing: border-box;
+            font-family: 'Playfair Display', serif; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: #332; box-sizing: border-box;
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Cpolygon points='2,2 2,22 7,17 12,26 16,24 11,15 20,15' fill='%233e2723' stroke='%23d4af37' stroke-width='1.5'/%3E%3C/svg%3E") 2 2, auto;
         }
 
-        .cover, .fold-wrapper, button, select, .notification-badge {
+        .cover, .fold-wrapper, button, select, .notification-badge, .gramophone-btn {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='rgba(62,39,35,0.2)' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='6' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='12' y1='18' x2='12' y2='24' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='0' y1='12' x2='6' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Cline x1='18' y1='12' x2='24' y2='12' stroke='%23d4af37' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b71c1c'/%3E%3C/svg%3E") 12 12, pointer !important;
         }
 
         input, textarea { cursor: text; }
-
         h1, h2, h3 { text-align: center; margin-top: 0; color: #2b1a10; }
 
         .scene { width: 100%; max-width: 800px; height: 550px; perspective: 1500px; margin-top: 20px; position: relative; }
-
         .book { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1); transform: translateX(-25%); }
         .book.open { transform: translateX(0); }
 
-        /* --- POWIADOMIENIA (SYSTEM ZNACZKÓW) --- */
+        /* --- POWIADOMIENIA --- */
         .notification-badge {
             position: absolute; background: #b71c1c; color: #fff; font-family: 'Special Elite', cursive; font-size: 12px;
             padding: 4px 8px; border-radius: 12px; border: 2px solid #1a0f0b; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             display: none; z-index: 100; pointer-events: none; animation: pulseBadge 1.5s infinite;
         }
-
         @keyframes pulseBadge { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
         #note-badge-cover { top: 20px; right: 20px; }
         #note-badge-corner { top: 15px; right: 50px; white-space: nowrap; }
 
-        /* --- SPREADY (ROZKŁADÓWKI) --- */
+        /* --- SPREADY I ZBRUDZONE KARTKI --- */
         .spread { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 1; }
         .spread.active { pointer-events: auto; z-index: 5; }
 
+        /* WZMOCNIONE PLAMY I BRUD NA KARTKACH */
         .page {
             position: absolute; width: 50%; height: 100%; top: 0; padding: 25px; box-sizing: border-box;
-            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 5px 5px 15px rgba(0,0,0,0.8); border: 1px solid #c2b280;
+            background: 
+                /* Plama atramentu w lewym dolnym rogu */
+                radial-gradient(circle at 15% 85%, rgba(20, 10, 5, 0.6) 0%, rgba(20, 10, 5, 0.15) 5%, transparent 12%),
+                /* Brązowa plama po kawie w prawym górnym rogu */
+                radial-gradient(circle at 85% 15%, rgba(60, 35, 20, 0.4) 0%, rgba(60, 35, 20, 0.05) 15%, transparent 30%),
+                /* Mocno przyciemnione i wypłowiałe krawędzie kartek */
+                radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(30, 20, 15, 0.5) 115%),
+                #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png');
+            box-shadow: inset 0 0 35px rgba(0,0,0,0.6), 5px 5px 15px rgba(0,0,0,0.8); border: 1px solid #9e8e6b;
             display: flex; flex-direction: column;
         }
 
@@ -65,22 +63,21 @@
         .book.open:not(.ready) .spread.active .left-page, .book.open:not(.ready) .spread.active .right-page { transition: opacity 0.6s ease 0.9s, visibility 0s 0.9s; }
         .book.ready .spread.active .left-page, .book.ready .spread.active .right-page { transition: opacity 0.4s ease; }
 
-        /* --- ZAGIĘTE ROGI (GÓRA) --- */
-        .fold-wrapper { position: absolute; top: 0; width: 60px; height: 60px; cursor: pointer; z-index: 50; }
-        .fold-wrapper.top-left { left: 0; }
-        .fold-wrapper.top-right { right: 0; }
+        /* --- ZAGIĘTE ROGI --- */
+        .fold-wrapper { position: absolute; top: 0; width: 60px; height: 60px; z-index: 50; }
+        .fold-wrapper.top-left { left: 0; } .fold-wrapper.top-right { right: 0; }
         .fold { position: absolute; top: 0; width: 0; height: 0; border-style: solid; transition: border-width 0.2s ease, filter 0.2s ease; }
         
-        .fold-wrapper.top-left .fold { left: 0; border-width: 50px 0 0 50px; border-color: #c8b993 transparent transparent #c8b993; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); }
+        .fold-wrapper.top-left .fold { left: 0; border-width: 50px 0 0 50px; border-color: #c8b993 transparent transparent #c8b993; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4)); }
         .fold-wrapper.top-left:hover .fold { border-width: 65px 0 0 65px; }
-        .fold-wrapper.top-right .fold { right: 0; border-width: 50px 50px 0 0; border-color: #c8b993 #c8b993 transparent transparent; filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.3)); }
+        .fold-wrapper.top-right .fold { right: 0; border-width: 50px 50px 0 0; border-color: #c8b993 #c8b993 transparent transparent; filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.4)); }
         .fold-wrapper.top-right:hover .fold { border-width: 65px 65px 0 0; }
 
         /* --- OKŁADKA --- */
         .cover {
             left: 50%; width: 50%; background: #3e2723 url('https://www.transparenttextures.com/patterns/leather.png');
             color: #d4af37; border-radius: 0 10px 10px 0; transform-origin: left; transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
-            z-index: 20; justify-content: center; align-items: center; cursor: pointer; box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
+            z-index: 20; justify-content: center; align-items: center; box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 10px 10px 20px rgba(0,0,0,0.9);
             border: 2px solid #1a0f0b; backface-visibility: hidden; -webkit-backface-visibility: hidden;
         }
         .cover h1 { font-family: 'Special Elite', cursive; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px #000; text-align: center; }
@@ -88,20 +85,35 @@
 
         /* --- PANEL STEROWANIA --- */
         .controls {
-            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png'); padding: 15px; margin-top: 30px;
+            background: #e8dcc4 url('https://www.transparenttextures.com/patterns/old-paper.png'); padding: 20px; margin-top: 30px;
             border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); width: 100%; max-width: 800px; box-sizing: border-box;
-            display: none; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; border: 2px solid #8b7355; margin-bottom: 30px;
+            display: none; flex-direction: column; align-items: center; border: 2px solid #8b7355; margin-bottom: 30px;
         }
         .controls input, .controls select, .controls button, .controls textarea { padding: 10px; font-family: 'Playfair Display', serif; font-size: 14px; background: rgba(255,255,255,0.7); border: 1px solid #8b7355; border-radius: 3px; }
-        .controls button { background: #3e2723; color: #fff; font-weight: bold; transition: background 0.2s; }
-        .controls button:hover { background: #5d4037; }
-        .controls .close-btn-panel { background: #8b2323; border-color: #5c1414; }
-        .controls .close-btn-panel:hover { background: #5c1414; }
+        .controls button { background: #3e2723; color: #fff; font-weight: bold; transition: background 0.2s; border: none; cursor: pointer; }
+        .controls button:hover { opacity: 0.9; }
+        .controls .close-btn-panel { background: #8b2323; margin-top: 15px; width: 100%; max-width: 300px; }
 
+        .main-controls-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; align-items: center; margin-top: 15px; }
+        .silent-frame {
+            margin-top: 15px; padding: 15px; width: 100%; box-sizing: border-box;
+            border: 2px dashed #8b7355; border-radius: 6px; background: rgba(139, 115, 85, 0.1);
+            display: none; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .silent-frame h4 { margin: 0; font-family: 'Special Elite', cursive; color: #3e2723; font-size: 15px; }
+
+        .toggle-btn {
+            background: transparent !important; color: #3e2723 !important; border: 2px solid #3e2723 !important; 
+            font-family: 'Special Elite', cursive !important; width: 100%; max-width: 300px;
+        }
+        .toggle-btn:hover { background: #3e2723 !important; color: #d4af37 !important; }
+
+        /* --- LISTY I INTERFEJS KSIĘGI --- */
         .entry-list { list-style: none; padding: 0; margin: 0; font-family: 'Special Elite', cursive; font-size: 14px; flex-grow: 1; }
         .entry-list li { border-bottom: 1px dashed #8b7355; padding: 8px 0; display: flex; justify-content: space-between; }
         .positive { color: #1b5e20; font-weight: bold; }
         .negative { color: #b71c1c; font-weight: bold; }
+        .big-number { font-size: 34px; font-weight: bold; font-family: 'Special Elite', cursive; color: #1a0f0b; }
 
         .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 2px solid #8b7355; font-family: 'Special Elite', cursive; font-size: 14px; }
         .pagination button { background: transparent; border: none; color: #3e2723; font-family: 'Special Elite', cursive; font-weight: bold; text-decoration: underline; padding: 5px; }
@@ -110,9 +122,63 @@
         .page::-webkit-scrollbar { width: 5px; }
         .page::-webkit-scrollbar-thumb { background: #8b7355; }
 
-        @keyframes mobileFade { from { opacity: 0; } to { opacity: 1; } }
+        /* --- ROZLICZENIE I PIECZĄTKA --- */
+        .tax-countdown {
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            margin: 15px auto 10px auto; padding: 8px 18px; 
+            border: 2px solid #3e2723; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            font-family: 'Special Elite', cursive; color: #3e2723; font-size: 16px;
+            width: fit-content; transform: rotate(-1.5deg); box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
 
-        /* --- WERSJA MOBILNA --- */
+        .ledger-box {
+            margin-top: 15px; padding: 25px 20px; border: 2px solid #8b7355; border-radius: 4px;
+            background: #f0e6d2 url('https://www.transparenttextures.com/patterns/cream-paper.png'); 
+            box-shadow: inset 0 0 15px rgba(139, 115, 85, 0.2), 2px 2px 6px rgba(0,0,0,0.1);
+            font-family: 'Playfair Display', serif; position: relative;
+        }
+        .ledger-box::before { content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px solid rgba(139, 115, 85, 0.6); pointer-events: none; }
+        .ledger-row { display: flex; justify-content: space-between; font-size: 18px; margin-bottom: 12px; position: relative; z-index: 2; }
+        .ledger-row span:last-child { font-weight: bold; font-family: 'Special Elite', cursive; }
+        .pool-container { text-align: center; position: relative; z-index: 2; margin-top: 15px; }
+        .pool-graphic { margin: 10px auto; display: flex; justify-content: center; align-items: center; }
+
+        .stamp-approved {
+            color: #991b1b; border: 3px double #991b1b; padding: 8px 15px;
+            font-family: 'Special Elite', cursive; font-size: 26px; font-weight: bold;
+            letter-spacing: 2px; text-transform: uppercase; transform: rotate(-8deg);
+            display: inline-block; opacity: 0.75; mix-blend-mode: multiply;
+            margin-top: 25px; border-radius: 4px; position: relative;
+        }
+        .stamp-approved::after { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 1px solid rgba(153, 27, 27, 0.4); pointer-events: none; border-radius: 6px; transform: rotate(1deg); }
+
+        /* --- GRAMOFON --- */
+        .gramophone-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 55px; height: 55px;
+            background: #2b1d14 url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            border: 2px solid #d4af37; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.8);
+            transition: transform 0.2s;
+        }
+        .gramophone-btn:hover { transform: scale(1.05); }
+        .gramophone-icon { width: 32px; height: 32px; stroke: #d4af37; transition: transform 0.5s linear; }
+        
+        .gramophone-btn.playing .gramophone-icon { animation: spinRecord 3s linear infinite; }
+        @keyframes spinRecord { 100% { transform: rotate(360deg); } }
+
+        .music-notes {
+            position: absolute; top: 0; left: 5px; font-size: 16px; color: #d4af37;
+            font-family: Arial, sans-serif; opacity: 0; pointer-events: none;
+        }
+        .gramophone-btn.playing .music-notes { animation: floatNotes 2s infinite linear; }
+        @keyframes floatNotes {
+            0% { transform: translate(0, 0) scale(0.6); opacity: 1; }
+            100% { transform: translate(-10px, -35px) scale(1.2); opacity: 0; }
+        }
+
         @media (max-width: 850px) {
             .scene { height: auto !important; margin-top: 10px; }
             .book { display: flex; flex-direction: column; gap: 20px; height: auto !important; transform: translateX(0) !important; }
@@ -123,13 +189,27 @@
             .cover { position: static !important; height: 300px !important; display: flex !important; }
             .left-page, .right-page { display: block !important; opacity: 1 !important; visibility: visible !important; }
             .book.open .cover { display: none !important; }
-            .controls { flex-direction: column; align-items: stretch; }
-            .controls input, .controls select, .controls button, .controls textarea { width: 100%; box-sizing: border-box; }
+            .main-controls-row { flex-direction: column; align-items: stretch; }
+            .main-controls-row input, .main-controls-row select, .main-controls-row button, .main-controls-row textarea { width: 100%; box-sizing: border-box; }
             #itemQuantity { width: 100% !important; }
+            .gramophone-btn { bottom: 15px; left: 15px; right: auto; }
         }
     </style>
 </head>
 <body>
+
+    <audio id="bgMusic" loop>
+        <source src="gramofon.mp3" type="audio/mpeg">
+    </audio>
+    <div class="gramophone-btn" id="gramophone-btn" onclick="toggleMusic()" title="Gramofon Obozowy (Włącz/Wyłącz)">
+        <span class="music-notes">♫</span>
+        <svg class="gramophone-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" fill="#1a0f0b"></circle>
+            <circle cx="12" cy="12" r="3" fill="#8b7355"></circle>
+            <circle cx="12" cy="12" r="1" fill="#3e2723"></circle>
+            <path d="M12 12 l4 4" stroke="#d4af37"></path>
+        </svg>
+    </div>
 
     <div class="scene">
         <div class="book" id="book">
@@ -150,7 +230,6 @@
                         <button id="btn-next" onclick="changePage(1)">Następna &#8594;</button>
                     </div>
                 </div>
-
                 <div class="page right-page">
                     <div class="fold-wrapper top-right" onclick="switchSpread(2)" title="Przewróć kartkę">
                         <div class="notification-badge" id="note-badge-corner">Nowa notatka!</div>
@@ -184,8 +263,10 @@
                         <button id="btn-next-note" onclick="changeNotePage(1)">Następna &#8594;</button>
                     </div>
                 </div>
-
                 <div class="page right-page">
+                    <div class="fold-wrapper top-right" onclick="switchSpread(3)" title="Przejdź do Rozliczenia">
+                        <div class="fold"></div>
+                    </div>
                     <h2>Zwierzęta</h2>
                     <div class="page-name">Inwentarz Żywy</div>
                     <div style="margin-top: 10px;">
@@ -193,24 +274,89 @@
                     </div>
                 </div>
             </div>
+
+            <div class="spread" id="spread-3">
+                <div class="page left-page">
+                    <div class="fold-wrapper top-left" onclick="switchSpread(2)" title="Wróć do Notatek i Zwierząt">
+                        <div class="fold"></div>
+                    </div>
+                    <h2>Podsumowanie</h2>
+                    <div class="page-name">Rozliczenie Rancha</div>
+                    <div class="tax-countdown">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3e2723" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.2));">
+                            <circle cx="12" cy="13" r="8"></circle>
+                            <path d="M12 9v4l2 2"></path><path d="M10 3h4"></path><path d="M12 3v2"></path>
+                        </svg>
+                        <span id="countdown-text">Sprawdzam księgi...</span>
+                    </div>
+                    <div class="ledger-box">
+                        <div class="ledger-row">
+                            <span>Stan Skarbca:</span>
+                            <span id="calc-total">0.00$</span>
+                        </div>
+                        <div class="ledger-row" style="color: #b71c1c;">
+                            <span>Koszty Utrzymania:</span>
+                            <span>-125.00$</span>
+                        </div>
+                        <hr style="border: 0; border-top: 2px solid #8b7355; margin: 20px 0 15px 0;">
+                        <div class="pool-container">
+                            <span style="font-size: 14px; font-style: italic; color: #5d4037; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Pula do podziału</span><br>
+                            <div class="pool-graphic">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#3e2723" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); transform: rotate(5deg);">
+                                    <path d="M8 3H16M12 3V6"></path><path d="M8 6C5.5 6 4 8 4 11C4 16 6 21 12 21C18 21 20 16 20 11C20 8 18.5 6 16 6"></path>
+                                    <circle cx="12" cy="14" r="3"></circle><path d="M12 12V16"></path><path d="M7 11c0-1.5 1-2.5 2.5-2.5"></path>
+                                </svg>
+                            </div>
+                            <span id="calc-pool" class="big-number">0.00$</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="page right-page" style="display: flex; flex-direction: column;">
+                    <h2>Lista Płac</h2>
+                    <div class="page-name">Pracownicy Rancha</div>
+                    <ul class="entry-list" id="payouts-list" style="margin-top: 20px; border-top: 1px solid #8b7355; padding-top: 15px; flex-grow: 1;"></ul>
+                    <div style="text-align: center; padding-bottom: 20px;">
+                        <div class="stamp-approved">ZATWIERDZONE</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="controls" id="controls">
-        <input type="text" id="personName" placeholder="Kto? (np. Arthur)" required>
-        <select id="actionType" onchange="toggleQuantityField()">
-            <option value="money_add">Wpłacił gotówkę (+)</option>
-            <option value="money_take">Zabrał gotówkę (-)</option>
-            <option value="item_add">Przyniósł przedmiot (+)</option>
-            <option value="item_take">Zabrał przedmiot (-)</option>
-            <option value="animal_add">Wprowadził zwierzę (+)</option>
-            <option value="animal_take">Wyprowadził zwierzę (-)</option>
-            <option value="note_add">Napisz notatkę (Zapis w Dzienniku)</option> 
-        </select>
-        <input type="text" id="amountOrItem" placeholder="Kwota ($) lub Przedmiot" required>
-        <textarea id="noteTextarea" placeholder="Treść notatki..." rows="1" style="display: none; width: 250px; resize: vertical;"></textarea>
-        <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
-        <button onclick="addEntry()">Zapisz wpis</button>
+        
+        <button id="togglePanelBtn" class="toggle-btn" onclick="togglePanelMode()">Pokaż panel: Cichy Magazyn</button>
+
+        <div class="main-controls-row" id="main-panel">
+            <input type="text" id="personName" placeholder="Kto? (np. Arthur)" required>
+            <select id="actionType" onchange="toggleQuantityField()">
+                <option value="money_add">Wpłacił gotówkę (+)</option>
+                <option value="money_take">Zabrał gotówkę (-)</option>
+                <option value="item_add">Przyniósł przedmiot (+)</option>
+                <option value="item_take">Zabrał przedmiot (-)</option>
+                <option value="animal_add">Wprowadził zwierzę (+)</option>
+                <option value="animal_take">Wyprowadził zwierzę (-)</option>
+                <option value="note_add">Napisz notatkę (Dziennik)</option> 
+            </select>
+            <input type="text" id="amountOrItem" placeholder="Kwota ($) lub Przedmiot" required>
+            <textarea id="noteTextarea" placeholder="Treść notatki..." rows="1" style="display: none; width: 250px; resize: vertical;"></textarea>
+            <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
+            <button onclick="addEntry()">Zapisz wpis</button>
+        </div>
+
+        <div class="silent-frame" id="silent-panel">
+            <h4>Ciche przywracanie stanu (Po resecie)</h4>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; align-items: center;">
+                <select id="silentAction" style="background: rgba(255,255,255,0.7);">
+                    <option value="item_add">Przedmiot do Magazynu</option>
+                    <option value="animal_add">Zwierzę do Inwentarza</option>
+                </select>
+                <input type="text" id="silentItem" placeholder="Nazwa">
+                <input type="number" id="silentQty" value="1" min="1" style="width: 60px;">
+                <button onclick="addSilentEntry()" style="background: #5d4037;">Zaktualizuj bez wpisu</button>
+            </div>
+        </div>
+
         <button onclick="closeBook()" class="close-btn-panel">✖ Zamknij Księgę</button>
     </div>
 
@@ -225,13 +371,10 @@
             projectId: "ksiegarancha",
             storageBucket: "ksiegarancha.firebasestorage.app",
             messagingSenderId: "166691689347",
-            appId: "1:166691689347:web:26acc4879308b5bcdd9cb6",
-            measurementId: "G-1KDS8CQGRT"
+            appId: "1:166691689347:web:26acc4879308b5bcdd9cb6"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         let ledgerData = [];
@@ -239,66 +382,97 @@
         let totalMoney = 0;
         let inventory = {};
         let animals = {}; 
+        let uniqueUsers = new Set(); 
         
         let currentPage = 1;
         const entriesPerPage = 7;
         let currentNotePage = 1; 
 
-        // ==========================================
-        // DŹWIĘKI OBOZOWE 
-        // Upewnij się, że pliki mają takie same nazwy na Twoim GitHubie!
-        // ==========================================
+        // Efekty dźwiękowe
         const soundOpen = new Audio('otwieranie.mp3'); 
         const soundPage = new Audio('papier.mp3');
         const soundCoins = new Audio('monety.mp3');
         const soundPen = new Audio('pioro.mp3');
 
-        soundOpen.volume = 0.8;
+        soundOpen.volume = 0.8; 
         soundPage.volume = 0.6;
-        soundCoins.volume = 0.5;
+        soundCoins.volume = 0.5; 
         soundPen.volume = 0.7;
 
-        function openBook() {
-            // Odtworzenie uderzenia okładki
-            soundOpen.currentTime = 0;
-            soundOpen.play().catch(e => console.log("Czekam na interakcję z dźwiękiem..."));
+        // GŁOŚNOŚĆ GRAMOFONU NA 0.02 ZGODNIE Z PROŚBĄ
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.02;
 
+        function toggleMusic() {
+            const btn = document.getElementById('gramophone-btn');
+            if (bgMusic.paused) {
+                bgMusic.play().catch(e => console.log("Brak pliku gramofon.mp3"));
+                btn.classList.add('playing');
+            } else {
+                bgMusic.pause();
+                btn.classList.remove('playing');
+            }
+        }
+
+        // --- FUNKCJA PRZEŁĄCZANIA PANELI ---
+        let isSilentMode = false;
+        function togglePanelMode() {
+            isSilentMode = !isSilentMode;
+            const mainPanel = document.getElementById('main-panel');
+            const silentPanel = document.getElementById('silent-panel');
+            const toggleBtn = document.getElementById('togglePanelBtn');
+
+            if (isSilentMode) {
+                mainPanel.style.display = 'none';
+                silentPanel.style.display = 'flex';
+                toggleBtn.innerText = 'Wróć do Głównego Rejestru';
+                toggleBtn.style.background = '#3e2723';
+                toggleBtn.style.color = '#d4af37';
+            } else {
+                mainPanel.style.display = 'flex';
+                silentPanel.style.display = 'none';
+                toggleBtn.innerText = 'Pokaż panel: Cichy Magazyn';
+                toggleBtn.style.background = 'transparent';
+                toggleBtn.style.color = '#3e2723';
+            }
+        }
+
+        function openBook() {
+            soundOpen.currentTime = 0; soundOpen.play().catch(e => console.log("Brak dźwięku"));
             document.getElementById('book').classList.add('open');
+            
+            // Próba odpalenia gramofonu przy pierwszym wejściu
+            if(bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    document.getElementById('gramophone-btn').classList.add('playing');
+                }).catch(e => console.log("Przeglądarka zablokowała auto-odtwarzanie."));
+            }
+
             setTimeout(() => {
                 document.getElementById('book').classList.add('ready');
                 document.getElementById('controls').style.display = 'flex';
                 toggleQuantityField(); 
-                if (window.innerWidth <= 850) {
-                    document.getElementById('controls').scrollIntoView({ behavior: 'smooth' });
-                }
+                if (window.innerWidth <= 850) document.getElementById('controls').scrollIntoView({ behavior: 'smooth' });
             }, 1000); 
         }
 
         function closeBook() {
-            document.getElementById('book').classList.remove('open');
-            document.getElementById('book').classList.remove('ready');
+            document.getElementById('book').classList.remove('open', 'ready');
             document.getElementById('controls').style.display = 'none';
-            switchSpread(1); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            switchSpread(1); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function switchSpread(spreadId) {
-            // Odtwarzanie dźwięku papieru przy zmianie stron
-            soundPage.currentTime = 0;
-            soundPage.play().catch(e => console.log("Brak dźwięku"));
-
+            soundPage.currentTime = 0; soundPage.play().catch(e => console.log("Brak dźwięku"));
             document.querySelectorAll('.spread').forEach(s => s.classList.remove('active'));
             document.getElementById('spread-' + spreadId).classList.add('active');
             
             if (spreadId === 2) {
                 let seenNotes = parseInt(localStorage.getItem('seenNotesCount')) || 0;
-                if (notesData.length > seenNotes) {
-                    currentNotePage = notesData.length; 
-                }
+                if (notesData.length > seenNotes) currentNotePage = notesData.length; 
                 localStorage.setItem('seenNotesCount', notesData.length);
                 updateUI(); 
             }
-
             if (window.innerWidth <= 850 && document.getElementById('book').classList.contains('open')) {
                 document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
             }
@@ -311,64 +485,51 @@
             const noteInput = document.getElementById('noteTextarea');
             
             if (action === 'note_add') {
-                amountInput.style.display = 'none';
-                qtyInput.style.display = 'none';
-                noteInput.style.display = ''; 
+                amountInput.style.display = 'none'; qtyInput.style.display = 'none'; noteInput.style.display = ''; 
             } else if(action.startsWith('item') || action.startsWith('animal')) {
-                amountInput.style.display = '';
-                amountInput.placeholder = action.startsWith('animal') ? "Nazwa zwierzęcia" : "Nazwa przedmiotu";
-                qtyInput.style.display = window.innerWidth <= 850 ? 'block' : 'inline-block';
-                noteInput.style.display = 'none';
+                amountInput.style.display = ''; amountInput.placeholder = action.startsWith('animal') ? "Nazwa zwierzęcia" : "Nazwa przedmiotu";
+                qtyInput.style.display = window.innerWidth <= 850 ? 'block' : 'inline-block'; noteInput.style.display = 'none';
             } else {
-                amountInput.style.display = '';
-                amountInput.placeholder = "Kwota ($)";
-                qtyInput.style.display = 'none';
-                noteInput.style.display = 'none';
+                amountInput.style.display = ''; amountInput.placeholder = "Kwota ($)";
+                qtyInput.style.display = 'none'; noteInput.style.display = 'none';
             }
         }
 
         database.ref('wspolna_ksiega').on('value', (snapshot) => {
             const data = snapshot.val();
-            
-            ledgerData = [];
-            notesData = []; 
-            totalMoney = 0;
-            inventory = {};
-            animals = {}; 
+            ledgerData = []; notesData = []; totalMoney = 0; inventory = {}; animals = {}; uniqueUsers.clear(); 
 
             if (data) {
                 Object.values(data).forEach(entry => {
                     let currentEntry = { ...entry };
                     let qty = currentEntry.quantity ? parseInt(currentEntry.quantity) : 1;
 
+                    if (currentEntry.name && currentEntry.action !== 'note_add' && !currentEntry.silent) {
+                        uniqueUsers.add(currentEntry.name);
+                    }
+
                     if (currentEntry.action === 'note_add') {
                         notesData.push(currentEntry);
                     } else {
-                        if ((currentEntry.action.startsWith('item') || currentEntry.action.startsWith('animal')) && currentEntry.value) {
-                            let standName = String(currentEntry.value).trim();
-                            standName = standName.charAt(0).toUpperCase() + standName.slice(1).toLowerCase();
-                            currentEntry.value = standName; 
+                        if (!currentEntry.silent) {
+                            ledgerData.push(currentEntry);
                         }
 
-                        ledgerData.push(currentEntry);
-
-                        if (currentEntry.action === 'money_add') {
-                            totalMoney += parseFloat(currentEntry.value);
-                        } else if (currentEntry.action === 'money_take') {
-                            totalMoney -= parseFloat(currentEntry.value);
-                        } else if (currentEntry.action === 'item_add') {
-                            inventory[currentEntry.value] = (inventory[currentEntry.value] || 0) + qty;
-                        } else if (currentEntry.action === 'item_take') {
-                            if (inventory[currentEntry.value] && inventory[currentEntry.value] > 0) {
-                                inventory[currentEntry.value] -= qty;
-                                if(inventory[currentEntry.value] <= 0) delete inventory[currentEntry.value];
-                            }
-                        } else if (currentEntry.action === 'animal_add') {
-                            animals[currentEntry.value] = (animals[currentEntry.value] || 0) + qty;
-                        } else if (currentEntry.action === 'animal_take') {
-                            if (animals[currentEntry.value] && animals[currentEntry.value] > 0) {
-                                animals[currentEntry.value] -= qty;
-                                if(animals[currentEntry.value] <= 0) delete animals[currentEntry.value];
+                        if (currentEntry.action === 'money_add') totalMoney += parseFloat(currentEntry.value);
+                        else if (currentEntry.action === 'money_take') totalMoney -= parseFloat(currentEntry.value);
+                        
+                        else if ((currentEntry.action.startsWith('item') || currentEntry.action.startsWith('animal')) && currentEntry.value) {
+                            let standName = String(currentEntry.value).trim();
+                            standName = standName.charAt(0).toUpperCase() + standName.slice(1).toLowerCase();
+                            
+                            if (currentEntry.action === 'item_add') inventory[standName] = (inventory[standName] || 0) + qty;
+                            else if (currentEntry.action === 'item_take' && inventory[standName] > 0) {
+                                inventory[standName] -= qty;
+                                if(inventory[standName] <= 0) delete inventory[standName];
+                            } else if (currentEntry.action === 'animal_add') animals[standName] = (animals[standName] || 0) + qty;
+                            else if (currentEntry.action === 'animal_take' && animals[standName] > 0) {
+                                animals[standName] -= qty;
+                                if(animals[standName] <= 0) delete animals[standName];
                             }
                         }
                     }
@@ -380,62 +541,44 @@
         function addEntry() {
             const name = document.getElementById('personName').value;
             const action = document.getElementById('actionType').value;
-            let value = "";
-            let quantity = 1;
+            let value = action === 'note_add' ? document.getElementById('noteTextarea').value : document.getElementById('amountOrItem').value;
+            let quantity = (action.startsWith('item') || action.startsWith('animal')) ? parseInt(document.getElementById('itemQuantity').value) || 1 : 1;
             
-            if(action === 'note_add') {
-                value = document.getElementById('noteTextarea').value;
-                // Dźwięk pióra
-                soundPen.currentTime = 0;
-                soundPen.play().catch(e => console.log("Brak dźwięku"));
-            } else {
-                value = document.getElementById('amountOrItem').value;
-                if(action.startsWith('item') || action.startsWith('animal')) {
-                    quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
-                }
-                if(action === 'money_add') {
-                    // Dźwięk monet
-                    soundCoins.currentTime = 0;
-                    soundCoins.play().catch(e => console.log("Brak dźwięku"));
-                }
-            }
+            if (!name || !value) return alert("Wpisz imię i wartość wpisu, kowboju!");
+            
+            if(action === 'note_add') { soundPen.currentTime = 0; soundPen.play().catch(e => console.log(e)); } 
+            else { soundCoins.currentTime = 0; soundCoins.play().catch(e => console.log(e)); }
 
             const date = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
-
-            if (!name || !value) {
-                alert("Wpisz imię i wartość wpisu, kowboju!");
-                return;
-            }
-
-            const entry = { date, name, action, value, quantity };
-            database.ref('wspolna_ksiega').push(entry);
+            database.ref('wspolna_ksiega').push({ date, name, action, value, quantity });
             
             document.getElementById('amountOrItem').value = '';
             document.getElementById('noteTextarea').value = '';
             document.getElementById('itemQuantity').value = '1';
             
-            if (action === 'note_add') {
-                currentNotePage = notesData.length + 1; 
-                switchSpread(2);
-            } else {
-                currentPage = 1; 
-                switchSpread(1); 
-            }
+            if (action === 'note_add') { currentNotePage = notesData.length + 1; switchSpread(2); }
+            else { currentPage = 1; switchSpread(1); }
+            if (window.innerWidth <= 850) document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addSilentEntry() {
+            const action = document.getElementById('silentAction').value;
+            const value = document.getElementById('silentItem').value;
+            const quantity = parseInt(document.getElementById('silentQty').value) || 1;
             
-            if (window.innerWidth <= 850) {
-                 document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
-            }
+            if (!value) return alert("Wpisz co dodajesz do magazynu, szeryfie!");
+
+            const date = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
+            soundPage.currentTime = 0; soundPage.play().catch(e => console.log(e));
+
+            database.ref('wspolna_ksiega').push({ date, name: "System", action, value, quantity, silent: true });
+            
+            document.getElementById('silentItem').value = '';
+            document.getElementById('silentQty').value = '1';
         }
 
-        function changePage(direction) {
-            currentPage += direction;
-            updateUI();
-        }
-
-        function changeNotePage(direction) {
-            currentNotePage += direction;
-            updateUI();
-        }
+        function changePage(dir) { currentPage += dir; updateUI(); }
+        function changeNotePage(dir) { currentNotePage += dir; updateUI(); }
 
         function updateNotifications() {
             let seenNotes = parseInt(localStorage.getItem('seenNotesCount')) || 0;
@@ -444,36 +587,26 @@
 
             if (notesData.length > seenNotes) {
                 let unread = notesData.length - seenNotes;
-                coverBadge.innerText = unread + " Nowa!";
-                coverBadge.style.display = 'block';
-                cornerBadge.innerText = unread + " Nowa!";
-                cornerBadge.style.display = 'block';
+                coverBadge.innerText = unread + " Nowa!"; coverBadge.style.display = 'block';
+                cornerBadge.innerText = unread + " Nowa!"; cornerBadge.style.display = 'block';
             } else {
-                coverBadge.style.display = 'none';
-                cornerBadge.style.display = 'none';
+                coverBadge.style.display = 'none'; cornerBadge.style.display = 'none';
             }
         }
 
         function updateUI() {
             const reversedData = [...ledgerData].reverse();
             const totalPages = Math.ceil(reversedData.length / entriesPerPage) || 1;
-
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
 
             const startIndex = (currentPage - 1) * entriesPerPage;
-            const endIndex = startIndex + entriesPerPage;
-            const currentEntries = reversedData.slice(startIndex, endIndex);
+            const currentEntries = reversedData.slice(startIndex, startIndex + entriesPerPage);
 
-            const entriesList = document.getElementById('ledger-entries');
-            entriesList.innerHTML = '';
-            
+            const entriesList = document.getElementById('ledger-entries'); entriesList.innerHTML = '';
             currentEntries.forEach(entry => {
                 const li = document.createElement('li');
-                let actionText = '';
-                let colorClass = '';
-                let qty = entry.quantity ? parseInt(entry.quantity) : 1; 
-
+                let actionText = ''; let colorClass = ''; let qty = entry.quantity ? parseInt(entry.quantity) : 1; 
                 switch(entry.action) {
                     case 'money_add': actionText = `wpłacił(a) ${entry.value}$`; colorClass = 'positive'; break;
                     case 'money_take': actionText = `zabrał(a) ${entry.value}$`; colorClass = 'negative'; break;
@@ -482,7 +615,6 @@
                     case 'animal_add': actionText = `przyprowadził(a): ${entry.value} (x${qty})`; colorClass = 'positive'; break;
                     case 'animal_take': actionText = `wyprowadził(a): ${entry.value} (x${qty})`; colorClass = 'negative'; break;
                 }
-
                 li.innerHTML = `<span>[${entry.date}] <b>${entry.name}</b></span> <span class="${colorClass}">${actionText}</span>`;
                 entriesList.appendChild(li);
             });
@@ -491,20 +623,17 @@
             document.getElementById('page-indicator').innerText = `${currentPage} / ${totalPages}`;
             document.getElementById('btn-prev').disabled = currentPage === 1;
             document.getElementById('btn-next').disabled = currentPage === totalPages;
-
             document.getElementById('total-money').innerText = totalMoney.toFixed(2);
             document.getElementById('total-money').className = totalMoney >= 0 ? 'positive' : 'negative';
 
-            const inventoryList = document.getElementById('inventory-list');
-            inventoryList.innerHTML = '';
+            const inventoryList = document.getElementById('inventory-list'); inventoryList.innerHTML = '';
             for (const [item, count] of Object.entries(inventory)) {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>${item}</span> <span>x${count}</span>`;
                 inventoryList.appendChild(li);
             }
 
-            const animalsListDOM = document.getElementById('animals-list');
-            animalsListDOM.innerHTML = '';
+            const animalsListDOM = document.getElementById('animals-list'); animalsListDOM.innerHTML = '';
             for (const [animal, count] of Object.entries(animals)) {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>${animal}</span> <span>x${count}</span>`;
@@ -525,14 +654,35 @@
                 noteAuthor.innerHTML = `~ ${note.name}<br><span style="font-size: 12px; color: #8b7355;">${note.date}</span>`;
                 noteIndicator.innerText = `Wpis nr ${currentNotePage} z ${totalNotePages}`;
             } else {
-                noteDisplay.innerText = "Brak wpisów w dzienniku. Napisz coś od siebie!";
-                noteAuthor.innerHTML = "";
-                noteIndicator.innerText = "Pusta strona";
+                noteDisplay.innerText = "Brak wpisów w dzienniku. Napisz coś od siebie!"; noteAuthor.innerHTML = ""; noteIndicator.innerText = "Pusta strona";
             }
-
             document.getElementById('btn-prev-note').disabled = currentNotePage === 1 || notesData.length === 0;
             document.getElementById('btn-next-note').disabled = currentNotePage === totalNotePages || notesData.length === 0;
 
+            const today = new Date();
+            let daysToSunday = 7 - today.getDay();
+            if (daysToSunday === 7) daysToSunday = 0; 
+
+            const countdownEl = document.getElementById('countdown-text');
+            if (daysToSunday === 0) countdownEl.innerHTML = `Księgowy przybywa: <b style="font-size: 18px; text-transform: uppercase;">DZIŚ</b>`;
+            else if (daysToSunday === 1) countdownEl.innerHTML = `Księgowy przybywa: <b style="font-size: 18px;">Jutro</b>`;
+            else countdownEl.innerHTML = `Księgowy przybywa: <b>za ${daysToSunday} dni</b>`;
+
+            let pool = totalMoney - 125;
+            document.getElementById('calc-total').innerText = totalMoney.toFixed(2) + "$";
+            document.getElementById('calc-pool').innerText = (pool > 0 ? pool.toFixed(2) : "0.00") + "$";
+
+            const payoutsList = document.getElementById('payouts-list'); payoutsList.innerHTML = '';
+            if (pool > 0 && uniqueUsers.size > 0) {
+                let share = pool / uniqueUsers.size; 
+                uniqueUsers.forEach(user => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${user}</span> <span class="positive">+ ${share.toFixed(2)}$</span>`;
+                    payoutsList.appendChild(li);
+                });
+            } else {
+                payoutsList.innerHTML = '<li><span style="color:#b71c1c; text-align:center; width:100%;">Brak środków do podziału.</span></li>';
+            }
             updateNotifications();
         }
     </script>
