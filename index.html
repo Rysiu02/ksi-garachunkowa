@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Księga Podatkowa Rancha</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
@@ -197,6 +200,15 @@
     </style>
 </head>
 <body>
+    <script>
+    // Wymuszenie odświeżenia dla nowej aktualizacji
+    const aktualnaWersja = "2.0"; 
+    if (localStorage.getItem("wersjaKsiegi") !== aktualnaWersja) {
+        localStorage.setItem("wersjaKsiegi", aktualnaWersja);
+        // Dodajemy losowy parametr na koniec linku, by wymusić pobranie z serwera
+        window.location.href = window.location.pathname + "?v=" + new Date().getTime();
+    }
+</script>
 
     <audio id="bgMusic" loop>
         <source src="gramofon.mp3" type="audio/mpeg">
