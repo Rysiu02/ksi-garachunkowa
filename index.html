@@ -202,7 +202,7 @@
 <body>
     <script>
     // Wymuszenie odświeżenia dla nowej aktualizacji
-    const aktualnaWersja = "2.0"; 
+    const aktualnaWersja = "2.1"; // Zwiększ tę wartość przy każdej aktualizacji, by wymusić odświeżenie
     if (localStorage.getItem("wersjaKsiegi") !== aktualnaWersja) {
         localStorage.setItem("wersjaKsiegi", aktualnaWersja);
         // Dodajemy losowy parametr na koniec linku, by wymusić pobranie z serwera
@@ -639,11 +639,12 @@
             document.getElementById('total-money').className = totalMoney >= 0 ? 'positive' : 'negative';
 
             const inventoryList = document.getElementById('inventory-list'); inventoryList.innerHTML = '';
-            for (const [item, count] of Object.entries(inventory)) {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${item}</span> <span>x${count}</span>`;
-                inventoryList.appendChild(li);
-            }
+// Dodano .sort(...) aby układać alfabetycznie z uwzględnieniem polskich znaków
+for (const [item, count] of Object.entries(inventory).sort((a, b) => a[0].localeCompare(b[0], 'pl'))) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${item}</span> <span>x${count}</span>`;
+    inventoryList.appendChild(li);
+}
 
             const animalsListDOM = document.getElementById('animals-list'); animalsListDOM.innerHTML = '';
             for (const [animal, count] of Object.entries(animals)) {
@@ -699,4 +700,4 @@
         }
     </script>
 </body>
-</html >
+</html>
