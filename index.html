@@ -281,12 +281,146 @@
     font-family: 'Playfair Display', serif;
 }
 .akcje-notatki button:hover { background: #3a2517; }
+
+/* --- Style dla spersonalizowanych kontrolek w klimacie Rancza --- */
+
+/* Wspólne style dla niestandardowych ramek wejściowych */
+.ranch-input-group {
+    position: relative;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+/* Wygląd pól tekstowych i liczbowych */
+.ranch-custom-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    background-color: #faf0e6; /* Kolor starego papieru/pergaminu */
+    border: 2px solid #5d4037; /* Ciemnobrązowa ramka */
+    border-radius: 4px;
+    font-family: 'Special Elite', cursive; /* Czcionka maszynowa */
+    font-size: 14px;
+    color: #3e2723;
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.ranch-custom-input:focus {
+    outline: none;
+    border-color: #8b7355; /* Jaśniejszy brąz przy aktywności */
+    background-color: #fff;
+}
+
+/* Ukrycie domyślnych strzałek dla inputów liczbowych */
+.ranch-custom-input[type=number]::-webkit-inner-spin-button, 
+.ranch-custom-input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+.ranch-custom-input[type=number] {
+  -moz-appearance: textfield; /* Dla Firefox */
+}
+
+/* --- Niestandardowa Lista Rozwijana (Dropdown) --- */
+
+.ranch-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Główny element wyświetlający wybraną opcję */
+.ranch-custom-select-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #faf0e6;
+    border: 2px solid #5d4037;
+    border-radius: 4px;
+    font-family: 'Playfair Display', serif; /* Elegancka czcionka szeryfowa dla nazw prac */
+    font-size: 14px;
+    color: #3e2723;
+    cursor: pointer;
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Niestandardowa strzałka dropdown */
+.ranch-custom-select-trigger::after {
+    content: '▼'; /* Prostokątna strzałka Unicode */
+    font-size: 10px;
+    color: #8b7355;
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+}
+
+/* Obrót strzałki gdy lista jest otwarta */
+.ranch-select-wrapper.open .ranch-custom-select-trigger::after {
+    transform: rotate(180deg);
+}
+
+/* Kontener na opcje (ukryty domyślnie) */
+.ranch-custom-options {
+    position: absolute;
+    display: block;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #fdf5e6; /* Nieco jaśniejszy pergamin */
+    border: 2px solid #5d4037;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    max-height: 200px; /* Maksymalna wysokość przewijania */
+    overflow-y: auto;
+}
+
+/* Pokaż listę gdy rodzic ma klasę .open */
+.ranch-select-wrapper.open .ranch-custom-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+    transform: translateY(0);
+}
+
+/* Wygląd pojedynczej opcji */
+.ranch-custom-option {
+    padding: 8px 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    color: #5d4037;
+    cursor: pointer;
+    border-bottom: 1px dotted rgba(139, 115, 85, 0.3);
+}
+
+.ranch-custom-option:last-child {
+    border-bottom: none;
+}
+
+/* Efekt najechania na opcję */
+.ranch-custom-option:hover {
+    background-color: #e0d0b0;
+    color: #3e2723;
+}
+
+/* Specjalny styl dla nagłówka "-- Wybierz rodzaj pracy --" */
+.ranch-custom-option.disabled {
+    color: #a0a0a0;
+    font-style: italic;
+    pointer-events: none;
+}
     </style>
 </head>
 <body>
     <script>
     // Wymuszenie odświeżenia dla nowej aktualizacji
-    const aktualnaWersja = "2.2"; // Zwiększ tę wartość przy każdej aktualizacji, by wymusić odświeżenie
+    const aktualnaWersja = "2.3"; // Zwiększ tę wartość przy każdej aktualizacji, by wymusić odświeżenie
     if (localStorage.getItem("wersjaKsiegi") !== aktualnaWersja) {
         localStorage.setItem("wersjaKsiegi", aktualnaWersja);
         // Dodajemy losowy parametr na koniec linku, by wymusić pobranie z serwera
@@ -395,24 +529,29 @@
                             <span>-125.00$</span>
                         </div>
                         <hr style="border: 0; border-top: 2px solid #8b7355; margin: 20px 0 15px 0;">
-                        <div class="pool-container">
-                            <span style="font-size: 14px; font-style: italic; color: #5d4037; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Pula do podziału</span><br>
-                            <div class="pool-graphic">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#3e2723" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); transform: rotate(5deg);">
-                                    <path d="M8 3H16M12 3V6"></path><path d="M8 6C5.5 6 4 8 4 11C4 16 6 21 12 21C18 21 20 16 20 11C20 8 18.5 6 16 6"></path>
-                                    <circle cx="12" cy="14" r="3"></circle><path d="M12 12V16"></path><path d="M7 11c0-1.5 1-2.5 2.5-2.5"></path>
-                                </svg>
-                            </div>
-                            <span id="calc-pool" class="big-number">0.00$</span>
-                        </div>
+                        
+                        <div style="margin-top: 15px;">
+        <h4 style="margin: 0 0 10px 0; border-bottom: 1px dashed #8b7355; padding-bottom: 5px; color: #3e2723; font-family: 'Special Elite', cursive; text-transform: uppercase; font-size: 14px;">Zarobki Pracowników</h4>
+        <div id="earnings-summary-list" style="font-family: 'Special Elite', cursive; font-size: 15px; max-height: 150px; overflow-y: auto;">
+            <div style="text-align:center; color:#8b7355; font-style:italic;">Brak wykonanych prac.</div>
+        </div>
+    </div>
+    <hr style="border: 0; border-top: 2px solid #8b7355; margin: 15px 0;">
+    <div style="margin-top: 10px;">
+        <h4 style="margin: 0 0 10px 0; border-bottom: 1px dashed #8b7355; padding-bottom: 5px; color: #3e2723; font-family: 'Special Elite', cursive; text-transform: uppercase; font-size: 14px;">Historia Wypłat</h4>
+        <ul id="payout-history-list" style="list-style: none; padding: 0; margin: 0; font-family: 'Special Elite', cursive; font-size: 13px; max-height: 150px; overflow-y: auto;">
+            <li style="text-align:center; color:#8b7355; font-style:italic;">Brak historii wypłat.</li>
+        </ul>
+    </div>
                     </div>
                 </div>
                 <div class="page right-page" style="display: flex; flex-direction: column;">
-                    <h2>Lista Płac</h2>
-                    <div class="page-name">Pracownicy Rancha</div>
-                    <ul class="entry-list" id="payouts-list" style="margin-top: 20px; border-top: 1px solid #8b7355; padding-top: 15px; flex-grow: 1;"></ul>
-                    <div style="text-align: center; padding-bottom: 20px;">
-                        <div class="stamp-approved">ZATWIERDZONE</div>
+                    <div class="work-container" style="text-align: left; width: 100%;">
+    <h3 style="font-family: 'Special Elite', cursive; color: #3e2723; border-bottom: 1px dashed #8b7355; padding-bottom: 5px;">Rejestr Prac i Wypłat</h3>
+    <ul class="entry-list" id="work-list" style="max-height: 350px; overflow-y: auto; padding: 0; list-style: none;">
+        <li style="text-align:center; width:100%; color:#8b7355; font-style:italic;">Brak zarejestrowanych prac.</li>
+    </ul>
+</div>
                     </div>
                 </div>
             </div>
@@ -439,6 +578,41 @@
             <input type="number" id="itemQuantity" placeholder="Ilość sztuk" value="1" min="1" style="display: none; width: 60px;">
             <button onclick="addEntry()">Zapisz wpis</button>
         </div>
+        <button class="toggle-btn" onclick="toggleWorkFrame()">Wykonana praca</button>
+
+<div class="silent-frame" id="work-frame" style="display: none; flex-direction: column; gap: 5px; margin-top: 10px;">
+    <h4 style="margin: 5px 0;">Zarejestruj wykonaną pracę</h4>
+    
+    <input type="text" id="workPerson" placeholder="Kto wykonał (np. John)">
+    
+    <select id="workTaskSelect" onchange="updatePayAmount()" style="padding: 5px; font-family: 'Playfair Display', serif;">
+        </select>
+
+    <input type="text" id="customTaskName" placeholder="Co to za zadanie? (Wpisz nazwę)" style="display: none;">
+    <input type="number" id="workQuantity" placeholder="Podaj ilość (np. 20)" value="1" min="1" oninput="updatePayAmount()" style="display: none;">
+    <input type="number" id="workPay" placeholder="Całkowita kwota wypłaty ($)">
+    
+    <button onclick="addWork()" style="margin-top: 5px;">Zapisz pracę</button>
+
+    <button onclick="toggleTaskManager()" style="margin-top: 10px; background-color: #5d4037; color: #f5f5dc; font-size: 12px;">⚙️ Edytuj listę dostępnych prac</button>
+</div>
+
+<div class="silent-frame" id="task-manager-frame" style="display: none; flex-direction: column; gap: 5px; margin-top: 10px; border: 2px dashed #8b7355;">
+    <h4 style="margin: 5px 0; color: #b71c1c;">Zarządzaj dostępnymi pracami</h4>
+    
+    <ul id="task-def-list" style="list-style: none; padding: 0; max-height: 150px; overflow-y: auto; font-size: 13px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">
+        </ul>
+
+    <h5 style="margin: 5px 0 0 0;">Dodaj nową pracę do systemu</h5>
+    <input type="text" id="newTaskName" placeholder="Nazwa (np. Rąbanie drewna)">
+    <input type="number" id="newTaskPay" placeholder="Kwota bazowa ($)">
+    <select id="newTaskType" style="padding: 5px; font-family: 'Playfair Display', serif;">
+        <option value="fixed">Kwota stała (za całość)</option>
+        <option value="per_item">Kwota od ilości (za sztukę)</option>
+    </select>
+    
+    <button onclick="addNewTaskDef()" style="background-color: #2e7d32; color: #fff; margin-top: 5px;">➕ Dodaj nową pracę</button>
+</div>
 
         <div class="silent-frame" id="silent-panel">
             <h4>Ciche przywracanie stanu (Po resecie)</h4>
@@ -882,6 +1056,381 @@ document.getElementById('anuluj-notatke').addEventListener('click', function() {
 document.getElementById('zapisz-notatke').addEventListener('click', function() {
     glownePoleNotatki.value = edytorNotatki.innerHTML; // Skopiuj sformatowany tekst (z tagami HTML) do głównego inputa
     tloRozmycie.style.display = 'none';
+});
+
+// 1. Tablica na prace (zapisuje się w przeglądarce)
+let workEntries = JSON.parse(localStorage.getItem("ranchWork")) || [];
+
+// 2. Pokazywanie/ukrywanie panelu wpisywania pracy
+function toggleWorkFrame() {
+    const frame = document.getElementById("work-frame");
+    if (frame.style.display === "none" || frame.style.display === "") {
+        frame.style.display = "flex";
+    } else {
+        frame.style.display = "none";
+    }
+}
+
+// Funkcja zapisująca pracę
+
+// 1. Zapisujemy Twoje domyślne prace do pamięci przeglądarki (uruchomi się tylko raz, by zachować Twoje ustawienia)
+let defaultTasks = [
+    { name: "Wykonanie zaopatrzenia Saloonu", pay: 15.00, type: "fixed" },
+    { name: "Prace porządkowe", pay: 15.00, type: "fixed" },
+    { name: "Sianie", pay: 0.50, type: "per_item" },
+    { name: "Zbiór plonów", pay: 0.20, type: "per_item" },
+    { name: "Dojenie krów", pay: 2.00, type: "per_item" },
+    { name: "Zbieranie jajek", pay: 0.30, type: "per_item" },
+    { name: "Ubój kurczaków", pay: 0.50, type: "per_item" },
+    { name: "Ubój bydła", pay: 1.00, type: "per_item" }
+];
+
+// Pobieramy zdefiniowane prace z pamięci, a jeśli ich nie ma, ładujemy domyślne
+let taskDefinitions = JSON.parse(localStorage.getItem("ranchTaskDefs")) || defaultTasks;
+
+// Funkcja otwierająca/zamykająca panel zarządzania pracami
+function toggleTaskManager() {
+    const frame = document.getElementById("task-manager-frame");
+    frame.style.display = frame.style.display === "none" || frame.style.display === "" ? "flex" : "none";
+}
+
+// Funkcja, która WYPEŁNIA główną listę rozwijaną w Panelu Rejestrowania Pracy
+function populateTaskSelect() {
+    const select = document.getElementById("workTaskSelect");
+    select.innerHTML = '<option value="" data-pay="" data-type="">-- Wybierz rodzaj pracy --</option>';
+
+    // Dodawanie prac z naszej bazy
+    taskDefinitions.forEach(task => {
+        let suffix = task.type === 'fixed' ? 'za całość' : '/ szt.';
+        select.innerHTML += `<option value="${task.name}" data-pay="${task.pay}" data-type="${task.type}">${task.name} (${task.pay}$ ${suffix})</option>`;
+    });
+
+    // Zawsze dodajemy opcję ręczną na samym końcu
+    select.innerHTML += `<option value="Inne zadanie(okazjonalne)" data-pay="0" data-type="custom">Inne zadanie (Wpisz uzgodnioną kwotę)</option>`;
+}
+
+// Funkcja wyświetlająca listę prac w Panelu Edycji z opcją usuwania
+function renderTaskDefinitions() {
+    const list = document.getElementById("task-def-list");
+    list.innerHTML = "";
+
+    if (taskDefinitions.length === 0) {
+        list.innerHTML = "<li>Brak zdefiniowanych prac. Dodaj jakąś poniżej!</li>";
+        return;
+    }
+
+    taskDefinitions.forEach((task, index) => {
+        let suffix = task.type === 'fixed' ? '(Stała)' : '(Od sztuki)';
+        list.innerHTML += `
+            <li style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0;">
+                <span><strong>${task.name}</strong> - ${task.pay.toFixed(2)}$ ${suffix}</span>
+                <button onclick="removeTaskDef(${index})" style="background:transparent; border:none; color:#b71c1c; cursor:pointer; font-weight:bold;">Usuń</button>
+            </li>
+        `;
+    });
+}
+
+// Funkcja dodawania nowej pracy z formularza
+function addNewTaskDef() {
+    const name = document.getElementById("newTaskName").value.trim();
+    const pay = parseFloat(document.getElementById("newTaskPay").value);
+    const type = document.getElementById("newTaskType").value;
+
+    if (name && !isNaN(pay) && pay >= 0) {
+        taskDefinitions.push({ name: name, pay: pay, type: type });
+        localStorage.setItem("ranchTaskDefs", JSON.stringify(taskDefinitions));
+        
+        // Czyszczenie pól wejściowych
+        document.getElementById("newTaskName").value = "";
+        document.getElementById("newTaskPay").value = "";
+        
+        // Odświeżenie widoków (zarówno panelu zarządzania, jak i listy rozwijanej)
+        renderTaskDefinitions();
+        populateTaskSelect();
+        
+        alert("Dodano nową pracę!");
+    } else {
+        alert("Podaj poprawną nazwę i kwotę pracy!");
+    }
+}
+
+// Funkcja usuwania zdefiniowanej pracy
+function removeTaskDef(index) {
+    if(confirm("Czy na pewno chcesz trwale usunąć ten rodzaj pracy z systemu?")) {
+        taskDefinitions.splice(index, 1);
+        localStorage.setItem("ranchTaskDefs", JSON.stringify(taskDefinitions));
+        
+        renderTaskDefinitions();
+        populateTaskSelect(); // Aktualizacja listy wyboru
+        updatePayAmount(); // Reset ewentualnie wpisanych kwot, gdyby ktoś usunął pracę, która akurat jest wybrana
+    }
+}
+
+// INICJALIZACJA - wywołujemy te dwie funkcje podczas ładowania strony, żeby od razu wygenerować listę
+document.addEventListener("DOMContentLoaded", function() {
+    populateTaskSelect();
+    renderTaskDefinitions();
+    // Tutaj możesz też wywołać updateWorkList(), jeśli było w `DOMContentLoaded`
+});
+
+function addWork() {
+    const person = document.getElementById("workPerson").value;
+    const select = document.getElementById("workTaskSelect");
+    const selectedOption = select.options[select.selectedIndex];
+    const taskType = selectedOption.getAttribute("data-type");
+    
+    let taskName = selectedOption.value; 
+    const customTaskInputValue = document.getElementById("customTaskName").value;
+    
+    // Jeśli wybrano "Inne zadanie", podmieniamy nazwę na to, co wpisał gracz w nowym polu
+    if (taskType === "custom") {
+        if (customTaskInputValue.trim() === "") {
+            alert("Musisz podać nazwę dla tego okazjonalnego zadania!");
+            return; // Przerywa działanie, jeśli ktoś nic nie wpisał
+        }
+        taskName = customTaskInputValue;
+    }
+
+    const qty = parseInt(document.getElementById("workQuantity").value) || 1;
+    const pay = parseFloat(document.getElementById("workPay").value);
+
+    if (person && taskName && !isNaN(pay) && pay > 0) {
+        
+        // Dopisywanie sztuk do nazwy
+        if (taskType === "per_item") {
+            taskName += ` (x${qty})`;
+        }
+
+        // Zapis do lokalnej bazy danych
+        workEntries.push({ person, task: taskName, pay });
+        localStorage.setItem("ranchWork", JSON.stringify(workEntries));
+        
+        // Czyszczenie i resetowanie wszystkich pól po zapisie
+        document.getElementById("workPerson").value = "";
+        document.getElementById("workTaskSelect").selectedIndex = 0;
+        
+        document.getElementById("workQuantity").value = "1";
+        document.getElementById("workQuantity").style.display = "none";
+        
+        document.getElementById("customTaskName").value = "";
+        document.getElementById("customTaskName").style.display = "none";
+        
+        document.getElementById("workPay").value = "";
+        document.getElementById("workPay").readOnly = false;
+        
+        // Odświeżanie Księgi
+        updateWorkList();
+        if (typeof updateEarningsSummary === "function") {
+            updateEarningsSummary();
+        }
+        
+    } else {
+        alert("Wypełnij imię, wybierz/wpisz zadanie i podaj kwotę!");
+    }
+}
+
+// 4. Odświeżanie wyglądu "Rejestru prac i Wypłat" na stronie
+function updateWorkList() {
+    const list = document.getElementById("work-list");
+    if (!list) return;
+
+    list.innerHTML = ""; // Czyścimy przed załadowaniem
+    
+    if (workEntries.length === 0) {
+        list.innerHTML = '<li style="text-align:center; width:100%; color:#8b7355; font-style:italic;">Brak zarejestrowanych prac.</li>';
+        return;
+    }
+
+    // Wyświetlanie od najnowszej do najstarszej
+    [...workEntries].reverse().forEach((work, reversedIndex) => {
+        // Obliczamy prawdziwy indeks, ponieważ odwróciliśmy tablicę do wyświetlania
+        const realIndex = workEntries.length - 1 - reversedIndex;
+        
+        list.innerHTML += `
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding: 5px 0;">
+                <span style="flex-grow: 1;"><strong>${work.person}</strong> - ${work.task}</span>
+                <span style="color: #2e7d32; font-weight: bold; margin-right: 15px;">+${work.pay.toFixed(2)}$</span>
+                <button onclick="removeWork(${realIndex})" style="background:transparent; border:none; color:#b71c1c; cursor:pointer; font-size:14px;" title="Usuń wpis">✖</button>
+            </li>
+        `;
+    });
+    updateEarningsSummary();
+}
+
+// 5. Usuwanie wpisu
+// Funkcja usuwania wpisu z pracy
+function removeWork(index) {
+    if(confirm("Czy na pewno chcesz usunąć ten wpis o pracy?")) {
+        workEntries.splice(index, 1);
+        localStorage.setItem("ranchWork", JSON.stringify(workEntries));
+        
+        // Odświeżamy główną listę
+        updateWorkList();
+        
+        // DODANE: Odświeżamy też ramkę z podsumowaniem zarobków!
+        if (typeof updateEarningsSummary === "function") {
+            updateEarningsSummary();
+        }
+    }
+}
+
+// 6. Odpalenie funkcji podczas wczytywania strony, żeby od razu pokazać wpisy
+document.addEventListener("DOMContentLoaded", function() {
+    updateWorkList();
+});
+
+// Funkcja automatycznie uzupełniająca kwotę na podstawie wybranej pracy
+// Funkcja automatycznie obliczająca kwotę na podstawie wybranej pracy i ilości
+function updatePayAmount() {
+    const select = document.getElementById("workTaskSelect");
+    const selectedOption = select.options[select.selectedIndex];
+    
+    const payInput = document.getElementById("workPay");
+    const qtyInput = document.getElementById("workQuantity");
+    const customTaskInput = document.getElementById("customTaskName"); // Pobieramy nowe pole
+    
+    const payValue = selectedOption.getAttribute("data-pay");
+    const taskType = selectedOption.getAttribute("data-type");
+    
+    if (payValue !== "" && payValue !== null) {
+        if (taskType === "custom") {
+            // "Inne zadanie" - pokazujemy pole na nazwę, ukrywamy ilość, odblokowujemy kwotę
+            qtyInput.style.display = "none";
+            customTaskInput.style.display = "block"; 
+            payInput.readOnly = false;
+            payInput.value = "";
+            payInput.placeholder = "Wpisz kwotę ręcznie ($)";
+            
+        } else if (taskType === "per_item") {
+            // Od sztuki - pokazujemy ilość, ukrywamy nazwę zadania
+            qtyInput.style.display = "block";
+            customTaskInput.style.display = "none";
+            payInput.readOnly = true;
+            
+            const qty = parseFloat(qtyInput.value) || 0;
+            const totalPay = parseFloat(payValue) * qty;
+            payInput.value = totalPay.toFixed(2);
+            payInput.placeholder = "Całkowita kwota wypłaty ($)";
+            
+        } else if (taskType === "fixed") {
+            // Stała kwota - ukrywamy i ilość, i nazwę
+            qtyInput.style.display = "none";
+            customTaskInput.style.display = "none";
+            qtyInput.value = "1";
+            payInput.readOnly = true;
+            payInput.value = parseFloat(payValue).toFixed(2);
+            payInput.placeholder = "Całkowita kwota wypłaty ($)";
+        }
+    } else {
+        // Reset gdy nic nie wybrano
+        qtyInput.style.display = "none";
+        customTaskInput.style.display = "none";
+        payInput.value = "";
+        payInput.readOnly = false;
+    }
+}
+
+// Funkcja podsumowująca całkowity zarobek każdej osoby (zaktualizowana)
+function updateEarningsSummary() {
+    const summaryContainer = document.getElementById("earnings-summary-list");
+    if (!summaryContainer) return;
+
+    if (!workEntries || workEntries.length === 0) {
+        summaryContainer.innerHTML = '<div style="text-align:center; color:#8b7355; font-style:italic;">Brak wykonanych prac.</div>';
+        return;
+    }
+
+    const earnings = {};
+    workEntries.forEach(work => {
+        if (!earnings[work.person]) {
+            earnings[work.person] = 0;
+        }
+        earnings[work.person] += work.pay;
+    });
+
+    summaryContainer.innerHTML = "";
+    for (const [person, total] of Object.entries(earnings)) {
+        summaryContainer.innerHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted rgba(139, 115, 85, 0.4); padding: 5px 0;">
+                <span style="flex-grow: 1;"><strong>${person}</strong></span>
+                <span style="color: #2e7d32; font-weight: bold; margin-right: 10px;">+${total.toFixed(2)}$</span>
+                <button onclick="payPerson('${person}', ${total})" style="background-color: #3e2723; color: #f5f5dc; border: 1px solid #8b7355; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-family: 'Special Elite', cursive; font-size: 12px;">Zapłać</button>
+            </div>
+        `;
+    }
+}
+
+// 1. Nowa tablica na historię wypłat (zapisywana w pamięci)
+let payoutHistory = JSON.parse(localStorage.getItem("ranchPayouts")) || [];
+
+// 2. PODMIENIONA funkcja wypłacająca (zapisuje do historii)
+function payPerson(personName, amount) {
+    if (confirm(`Czy na pewno chcesz wypłacić ${amount.toFixed(2)}$ dla ${personName}? To usunie prace z rejestru i zapisze w archiwum.`)) {
+        
+        // --- NOWE: Zapis do historii z datą i godziną ---
+        const now = new Date();
+        const dateString = now.toLocaleDateString('pl-PL') + ' ' + now.toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
+        
+        payoutHistory.push({
+            date: dateString,
+            person: personName,
+            amount: amount
+        });
+        localStorage.setItem("ranchPayouts", JSON.stringify(payoutHistory));
+
+        // Usuwanie nierozliczonych prac opłacanej osoby (jak było)
+        workEntries = workEntries.filter(work => work.person !== personName);
+        localStorage.setItem("ranchWork", JSON.stringify(workEntries));
+        
+        // Odświeżanie wszystkich trzech widoków
+        updateWorkList();
+        updateEarningsSummary();
+        updatePayoutHistory();
+    }
+}
+
+// 3. NOWA funkcja: Rysowanie archiwum na stronie
+function updatePayoutHistory() {
+    const list = document.getElementById("payout-history-list");
+    if (!list) return;
+
+    list.innerHTML = "";
+    if (payoutHistory.length === 0) {
+        list.innerHTML = '<li style="text-align:center; color:#8b7355; font-style:italic;">Brak historii wypłat.</li>';
+        return;
+    }
+
+    // Odwracamy tablicę, żeby najnowsze wypłaty były na samej górze
+    [...payoutHistory].reverse().forEach((payout, index) => {
+        const realIndex = payoutHistory.length - 1 - index;
+        list.innerHTML += `
+            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted rgba(139, 115, 85, 0.4); padding: 5px 0;">
+                <span style="flex-grow: 1;">
+                    <span style="font-size: 10px; color: #8b7355; display: block;">${payout.date}</span>
+                    <strong>${payout.person}</strong>
+                </span>
+                <span style="color: #b71c1c; font-weight: bold; margin-right: 10px;">Wypłacono: ${payout.amount.toFixed(2)}$</span>
+                <button onclick="removePayoutRecord(${realIndex})" style="background:transparent; border:none; color:#5d4037; cursor:pointer; font-size:12px;" title="Usuń z historii">✖</button>
+            </li>
+        `;
+    });
+}
+
+// 4. NOWA funkcja: Usuwanie pomyłki z historii
+function removePayoutRecord(index) {
+    if(confirm("Czy na pewno usunąć ten wpis z historii wypłat? (Pieniędzy nie da się już cofnąć do roboczych prac).")) {
+        payoutHistory.splice(index, 1);
+        localStorage.setItem("ranchPayouts", JSON.stringify(payoutHistory));
+        updatePayoutHistory();
+    }
+}
+
+// 5. Zadbaj, by historia wczytała się po odświeżeniu strony!
+// Dopisz to do swojego document.addEventListener("DOMContentLoaded"... jeśli już go masz:
+document.addEventListener("DOMContentLoaded", function() {
+    if (typeof updatePayoutHistory === "function") {
+        updatePayoutHistory();
+    }
 });
     </script>
 </body>
