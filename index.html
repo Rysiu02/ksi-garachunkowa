@@ -1058,22 +1058,12 @@ document.getElementById('zapisz-notatke').addEventListener('click', function() {
     tloRozmycie.style.display = 'none';
 });
 
-// 1. Tablica na prace (zapisuje się w przeglądarce)
-let workEntries = JSON.parse(localStorage.getItem("ranchWork")) || [];
+// ==========================================
+// SYSTEM REJESTRU PRAC (Zsynchronizowany z Firebase)
+// ==========================================
 
-// 2. Pokazywanie/ukrywanie panelu wpisywania pracy
-function toggleWorkFrame() {
-    const frame = document.getElementById("work-frame");
-    if (frame.style.display === "none" || frame.style.display === "") {
-        frame.style.display = "flex";
-    } else {
-        frame.style.display = "none";
-    }
-}
-
-// Funkcja zapisująca pracę
-
-// 1. Zapisujemy Twoje domyślne prace do pamięci przeglądarki (uruchomi się tylko raz, by zachować Twoje ustawienia)
+let workEntries = [];
+let payoutHistory = [];
 let defaultTasks = [
     { name: "Wykonanie zaopatrzenia Saloonu", pay: 15.00, type: "fixed" },
     { name: "Prace porządkowe", pay: 15.00, type: "fixed" },
@@ -1084,344 +1074,179 @@ let defaultTasks = [
     { name: "Ubój kurczaków", pay: 0.50, type: "per_item" },
     { name: "Ubój bydła", pay: 1.00, type: "per_item" }
 ];
+let taskDefinitions = defaultTasks;
 
-// Pobieramy zdefiniowane prace z pamięci, a jeśli ich nie ma, ładujemy domyślne
-let taskDefinitions = JSON.parse(localStorage.getItem("ranchTaskDefs")) || defaultTasks;
+// --- 1. NASŁUCHIWANIE BAZY DANYCH (Automatyczne odświeżanie u wszystkich) ---
+database.ref('ranchTaskDefs').on('value', (snapshot) => {
+    const data = snapshot.val();
+    taskDefinitions = data ? (Array.isArray(data) ? data : Object.values(data)) : defaultTasks;
+    populateTaskSelect();
+    renderTaskDefinitions();
+});
 
-// Funkcja otwierająca/zamykająca panel zarządzania pracami
-function toggleTaskManager() {
-    const frame = document.getElementById("task-manager-frame");
-    frame.style.display = frame.style.display === "none" || frame.style.display === "" ? "flex" : "none";
-}
+database.ref('ranchWork').on('value', (snapshot) => {
+    const data = snapshot.val();
+    workEntries = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+    updateWorkList();
+    updateEarningsSummary();
+});
 
-// Funkcja, która WYPEŁNIA główną listę rozwijaną w Panelu Rejestrowania Pracy
+database.ref('ranchPayouts').on('value', (snapshot) => {
+    const data = snapshot.val();
+    payoutHistory = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+    updatePayoutHistory();
+});
+
+
+// --- 2. MENEDŻER ZADAŃ (Zapis na serwer) ---
 function populateTaskSelect() {
     const select = document.getElementById("workTaskSelect");
+    if(!select) return;
     select.innerHTML = '<option value="" data-pay="" data-type="">-- Wybierz rodzaj pracy --</option>';
-
-    // Dodawanie prac z naszej bazy
     taskDefinitions.forEach(task => {
         let suffix = task.type === 'fixed' ? 'za całość' : '/ szt.';
         select.innerHTML += `<option value="${task.name}" data-pay="${task.pay}" data-type="${task.type}">${task.name} (${task.pay}$ ${suffix})</option>`;
     });
-
-    // Zawsze dodajemy opcję ręczną na samym końcu
     select.innerHTML += `<option value="Inne zadanie(okazjonalne)" data-pay="0" data-type="custom">Inne zadanie (Wpisz uzgodnioną kwotę)</option>`;
 }
 
-// Funkcja wyświetlająca listę prac w Panelu Edycji z opcją usuwania
 function renderTaskDefinitions() {
     const list = document.getElementById("task-def-list");
-    list.innerHTML = "";
-
-    if (taskDefinitions.length === 0) {
-        list.innerHTML = "<li>Brak zdefiniowanych prac. Dodaj jakąś poniżej!</li>";
-        return;
-    }
-
+    if(!list) return;
+    list.innerHTML = taskDefinitions.length === 0 ? "<li>Brak zdefiniowanych prac.</li>" : "";
     taskDefinitions.forEach((task, index) => {
         let suffix = task.type === 'fixed' ? '(Stała)' : '(Od sztuki)';
-        list.innerHTML += `
-            <li style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0;">
-                <span><strong>${task.name}</strong> - ${task.pay.toFixed(2)}$ ${suffix}</span>
-                <button onclick="removeTaskDef(${index})" style="background:transparent; border:none; color:#b71c1c; cursor:pointer; font-weight:bold;">Usuń</button>
-            </li>
-        `;
+        list.innerHTML += `<li style="display:flex; justify-content:space-between; padding:2px 0;"><span><strong>${task.name}</strong> - ${task.pay.toFixed(2)}$ ${suffix}</span> <button onclick="removeTaskDef(${index})" style="background:none; border:none; color:#b71c1c; cursor:pointer;">✖</button></li>`;
     });
 }
 
-// Funkcja dodawania nowej pracy z formularza
 function addNewTaskDef() {
     const name = document.getElementById("newTaskName").value.trim();
     const pay = parseFloat(document.getElementById("newTaskPay").value);
     const type = document.getElementById("newTaskType").value;
-
+    
     if (name && !isNaN(pay) && pay >= 0) {
-        taskDefinitions.push({ name: name, pay: pay, type: type });
-        localStorage.setItem("ranchTaskDefs", JSON.stringify(taskDefinitions));
-        
-        // Czyszczenie pól wejściowych
-        document.getElementById("newTaskName").value = "";
+        taskDefinitions.push({ name, pay, type });
+        database.ref('ranchTaskDefs').set(taskDefinitions); // WYSYŁKA DO BAZY
+        document.getElementById("newTaskName").value = ""; 
         document.getElementById("newTaskPay").value = "";
-        
-        // Odświeżenie widoków (zarówno panelu zarządzania, jak i listy rozwijanej)
-        renderTaskDefinitions();
-        populateTaskSelect();
-        
-        alert("Dodano nową pracę!");
-    } else {
-        alert("Podaj poprawną nazwę i kwotę pracy!");
-    }
+    } else alert("Podaj poprawną nazwę i kwotę!");
 }
 
-// Funkcja usuwania zdefiniowanej pracy
 function removeTaskDef(index) {
-    if(confirm("Czy na pewno chcesz trwale usunąć ten rodzaj pracy z systemu?")) {
+    if(confirm("Usunąć tę pracę z systemu? Zniknie u wszystkich graczy.")) {
         taskDefinitions.splice(index, 1);
-        localStorage.setItem("ranchTaskDefs", JSON.stringify(taskDefinitions));
-        
-        renderTaskDefinitions();
-        populateTaskSelect(); // Aktualizacja listy wyboru
-        updatePayAmount(); // Reset ewentualnie wpisanych kwot, gdyby ktoś usunął pracę, która akurat jest wybrana
+        database.ref('ranchTaskDefs').set(taskDefinitions); // WYSYŁKA DO BAZY
     }
 }
 
-// INICJALIZACJA - wywołujemy te dwie funkcje podczas ładowania strony, żeby od razu wygenerować listę
-document.addEventListener("DOMContentLoaded", function() {
-    populateTaskSelect();
-    renderTaskDefinitions();
-    // Tutaj możesz też wywołać updateWorkList(), jeśli było w `DOMContentLoaded`
-});
+
+// --- 3. REJESTROWANIE PRACY (Zapis na serwer) ---
+function updatePayAmount() {
+    const select = document.getElementById("workTaskSelect");
+    if(select.selectedIndex < 0) return;
+    const opt = select.options[select.selectedIndex];
+    
+    const payInput = document.getElementById("workPay"), qtyInput = document.getElementById("workQuantity"), customTask = document.getElementById("customTaskName");
+    const payValue = opt.getAttribute("data-pay"), type = opt.getAttribute("data-type");
+
+    qtyInput.style.display = "none"; customTask.style.display = "none"; payInput.readOnly = false; payInput.value = "";
+
+    if (type === "custom") {
+        customTask.style.display = "block"; payInput.placeholder = "Wpisz kwotę ręcznie ($)";
+    } else if (type === "per_item") {
+        qtyInput.style.display = "block"; payInput.readOnly = true;
+        payInput.value = (parseFloat(payValue) * (parseFloat(qtyInput.value) || 0)).toFixed(2);
+    } else if (type === "fixed") {
+        qtyInput.value = "1"; payInput.readOnly = true; payInput.value = parseFloat(payValue).toFixed(2);
+    }
+}
 
 function addWork() {
     const person = document.getElementById("workPerson").value;
     const select = document.getElementById("workTaskSelect");
-    const selectedOption = select.options[select.selectedIndex];
-    const taskType = selectedOption.getAttribute("data-type");
+    const opt = select.options[select.selectedIndex];
     
-    let taskName = selectedOption.value; 
-    const customTaskInputValue = document.getElementById("customTaskName").value;
-    
-    // Jeśli wybrano "Inne zadanie", podmieniamy nazwę na to, co wpisał gracz w nowym polu
-    if (taskType === "custom") {
-        if (customTaskInputValue.trim() === "") {
-            alert("Musisz podać nazwę dla tego okazjonalnego zadania!");
-            return; // Przerywa działanie, jeśli ktoś nic nie wpisał
-        }
-        taskName = customTaskInputValue;
-    }
-
+    let taskName = opt.value;
+    const type = opt.getAttribute("data-type");
+    const customTaskVal = document.getElementById("customTaskName").value;
     const qty = parseInt(document.getElementById("workQuantity").value) || 1;
     const pay = parseFloat(document.getElementById("workPay").value);
 
+    if (type === "custom") {
+        if (!customTaskVal.trim()) return alert("Podaj nazwę okazjonalnego zadania!");
+        taskName = customTaskVal;
+    }
+    
     if (person && taskName && !isNaN(pay) && pay > 0) {
+        if (type === "per_item") taskName += ` (x${qty})`;
         
-        // Dopisywanie sztuk do nazwy
-        if (taskType === "per_item") {
-            taskName += ` (x${qty})`;
-        }
-
-        // Zapis do lokalnej bazy danych
         workEntries.push({ person, task: taskName, pay });
-        localStorage.setItem("ranchWork", JSON.stringify(workEntries));
-        
-        // Czyszczenie i resetowanie wszystkich pól po zapisie
-        document.getElementById("workPerson").value = "";
-        document.getElementById("workTaskSelect").selectedIndex = 0;
-        
-        document.getElementById("workQuantity").value = "1";
-        document.getElementById("workQuantity").style.display = "none";
-        
+        database.ref('ranchWork').set(workEntries); // WYSYŁKA DO BAZY
+
+        document.getElementById("workPerson").value = ""; 
+        select.selectedIndex = 0;
+        document.getElementById("workQuantity").value = "1"; 
         document.getElementById("customTaskName").value = "";
-        document.getElementById("customTaskName").style.display = "none";
-        
-        document.getElementById("workPay").value = "";
-        document.getElementById("workPay").readOnly = false;
-        
-        // Odświeżanie Księgi
-        updateWorkList();
-        if (typeof updateEarningsSummary === "function") {
-            updateEarningsSummary();
-        }
-        
-    } else {
-        alert("Wypełnij imię, wybierz/wpisz zadanie i podaj kwotę!");
-    }
+        updatePayAmount();
+    } else alert("Wypełnij imię, wybierz zadanie i podaj kwotę!");
 }
 
-// 4. Odświeżanie wyglądu "Rejestru prac i Wypłat" na stronie
-function updateWorkList() {
-    const list = document.getElementById("work-list");
-    if (!list) return;
-
-    list.innerHTML = ""; // Czyścimy przed załadowaniem
-    
-    if (workEntries.length === 0) {
-        list.innerHTML = '<li style="text-align:center; width:100%; color:#8b7355; font-style:italic;">Brak zarejestrowanych prac.</li>';
-        return;
-    }
-
-    // Wyświetlanie od najnowszej do najstarszej
-    [...workEntries].reverse().forEach((work, reversedIndex) => {
-        // Obliczamy prawdziwy indeks, ponieważ odwróciliśmy tablicę do wyświetlania
-        const realIndex = workEntries.length - 1 - reversedIndex;
-        
-        list.innerHTML += `
-            <li style="display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; padding: 5px 0;">
-                <span style="flex-grow: 1;"><strong>${work.person}</strong> - ${work.task}</span>
-                <span style="color: #2e7d32; font-weight: bold; margin-right: 15px;">+${work.pay.toFixed(2)}$</span>
-                <button onclick="removeWork(${realIndex})" style="background:transparent; border:none; color:#b71c1c; cursor:pointer; font-size:14px;" title="Usuń wpis">✖</button>
-            </li>
-        `;
-    });
-    updateEarningsSummary();
-}
-
-// 5. Usuwanie wpisu
-// Funkcja usuwania wpisu z pracy
 function removeWork(index) {
-    if(confirm("Czy na pewno chcesz usunąć ten wpis o pracy?")) {
+    if(confirm("Usunąć ten wpis o pracy u wszystkich graczy?")) {
         workEntries.splice(index, 1);
-        localStorage.setItem("ranchWork", JSON.stringify(workEntries));
-        
-        // Odświeżamy główną listę
-        updateWorkList();
-        
-        // DODANE: Odświeżamy też ramkę z podsumowaniem zarobków!
-        if (typeof updateEarningsSummary === "function") {
-            updateEarningsSummary();
-        }
+        database.ref('ranchWork').set(workEntries); // WYSYŁKA DO BAZY
     }
 }
 
-// 6. Odpalenie funkcji podczas wczytywania strony, żeby od razu pokazać wpisy
-document.addEventListener("DOMContentLoaded", function() {
-    updateWorkList();
-});
 
-// Funkcja automatycznie uzupełniająca kwotę na podstawie wybranej pracy
-// Funkcja automatycznie obliczająca kwotę na podstawie wybranej pracy i ilości
-function updatePayAmount() {
-    const select = document.getElementById("workTaskSelect");
-    const selectedOption = select.options[select.selectedIndex];
-    
-    const payInput = document.getElementById("workPay");
-    const qtyInput = document.getElementById("workQuantity");
-    const customTaskInput = document.getElementById("customTaskName"); // Pobieramy nowe pole
-    
-    const payValue = selectedOption.getAttribute("data-pay");
-    const taskType = selectedOption.getAttribute("data-type");
-    
-    if (payValue !== "" && payValue !== null) {
-        if (taskType === "custom") {
-            // "Inne zadanie" - pokazujemy pole na nazwę, ukrywamy ilość, odblokowujemy kwotę
-            qtyInput.style.display = "none";
-            customTaskInput.style.display = "block"; 
-            payInput.readOnly = false;
-            payInput.value = "";
-            payInput.placeholder = "Wpisz kwotę ręcznie ($)";
-            
-        } else if (taskType === "per_item") {
-            // Od sztuki - pokazujemy ilość, ukrywamy nazwę zadania
-            qtyInput.style.display = "block";
-            customTaskInput.style.display = "none";
-            payInput.readOnly = true;
-            
-            const qty = parseFloat(qtyInput.value) || 0;
-            const totalPay = parseFloat(payValue) * qty;
-            payInput.value = totalPay.toFixed(2);
-            payInput.placeholder = "Całkowita kwota wypłaty ($)";
-            
-        } else if (taskType === "fixed") {
-            // Stała kwota - ukrywamy i ilość, i nazwę
-            qtyInput.style.display = "none";
-            customTaskInput.style.display = "none";
-            qtyInput.value = "1";
-            payInput.readOnly = true;
-            payInput.value = parseFloat(payValue).toFixed(2);
-            payInput.placeholder = "Całkowita kwota wypłaty ($)";
-        }
-    } else {
-        // Reset gdy nic nie wybrano
-        qtyInput.style.display = "none";
-        customTaskInput.style.display = "none";
-        payInput.value = "";
-        payInput.readOnly = false;
-    }
+// --- 4. WIDOKI I WYPŁATY (Zapis na serwer) ---
+function updateWorkList() {
+    const list = document.getElementById("work-list"); if (!list) return;
+    list.innerHTML = workEntries.length ? "" : '<li style="text-align:center; color:#8b7355; font-style:italic;">Brak zarejestrowanych prac.</li>';
+    [...workEntries].reverse().forEach((work, i) => {
+        list.innerHTML += `<li style="display:flex; justify-content:space-between; border-bottom:1px dotted #ccc; padding:5px 0;"><span><strong>${work.person}</strong> - ${work.task}</span><div><span style="color:#2e7d32; font-weight:bold; margin-right:15px;">+${work.pay.toFixed(2)}$</span><button onclick="removeWork(${workEntries.length - 1 - i})" style="background:none; border:none; color:#b71c1c; cursor:pointer;">✖</button></div></li>`;
+    });
 }
 
-// Funkcja podsumowująca całkowity zarobek każdej osoby (zaktualizowana)
 function updateEarningsSummary() {
-    const summaryContainer = document.getElementById("earnings-summary-list");
-    if (!summaryContainer) return;
-
-    if (!workEntries || workEntries.length === 0) {
-        summaryContainer.innerHTML = '<div style="text-align:center; color:#8b7355; font-style:italic;">Brak wykonanych prac.</div>';
-        return;
-    }
-
+    const summary = document.getElementById("earnings-summary-list"); if (!summary) return;
+    if (!workEntries.length) return summary.innerHTML = '<div style="text-align:center; color:#8b7355; font-style:italic;">Brak wykonanych prac.</div>';
+    
     const earnings = {};
-    workEntries.forEach(work => {
-        if (!earnings[work.person]) {
-            earnings[work.person] = 0;
-        }
-        earnings[work.person] += work.pay;
-    });
-
-    summaryContainer.innerHTML = "";
+    workEntries.forEach(w => earnings[w.person] = (earnings[w.person] || 0) + w.pay);
+    
+    summary.innerHTML = "";
     for (const [person, total] of Object.entries(earnings)) {
-        summaryContainer.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted rgba(139, 115, 85, 0.4); padding: 5px 0;">
-                <span style="flex-grow: 1;"><strong>${person}</strong></span>
-                <span style="color: #2e7d32; font-weight: bold; margin-right: 10px;">+${total.toFixed(2)}$</span>
-                <button onclick="payPerson('${person}', ${total})" style="background-color: #3e2723; color: #f5f5dc; border: 1px solid #8b7355; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-family: 'Special Elite', cursive; font-size: 12px;">Zapłać</button>
-            </div>
-        `;
+        summary.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dotted rgba(139,115,85,0.4); padding:5px 0;"><span><strong>${person}</strong></span><span style="color:#2e7d32; font-weight:bold; margin-right:10px;">+${total.toFixed(2)}$</span><button onclick="payPerson('${person}', ${total})" style="background:#3e2723; color:#f5f5dc; border:1px solid #8b7355; padding:2px 8px; border-radius:3px; cursor:pointer; font-size:12px;">Zapłać</button></div>`;
     }
 }
 
-// 1. Nowa tablica na historię wypłat (zapisywana w pamięci)
-let payoutHistory = JSON.parse(localStorage.getItem("ranchPayouts")) || [];
-
-// 2. PODMIENIONA funkcja wypłacająca (zapisuje do historii)
-function payPerson(personName, amount) {
-    if (confirm(`Czy na pewno chcesz wypłacić ${amount.toFixed(2)}$ dla ${personName}? To usunie prace z rejestru i zapisze w archiwum.`)) {
+function payPerson(person, amount) {
+    if (confirm(`Wypłacić ${amount.toFixed(2)}$ dla ${person}?`)) {
+        const dateStr = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'});
         
-        // --- NOWE: Zapis do historii z datą i godziną ---
-        const now = new Date();
-        const dateString = now.toLocaleDateString('pl-PL') + ' ' + now.toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
+        payoutHistory.push({ date: dateStr, person, amount });
+        workEntries = workEntries.filter(w => w.person !== person);
         
-        payoutHistory.push({
-            date: dateString,
-            person: personName,
-            amount: amount
-        });
-        localStorage.setItem("ranchPayouts", JSON.stringify(payoutHistory));
-
-        // Usuwanie nierozliczonych prac opłacanej osoby (jak było)
-        workEntries = workEntries.filter(work => work.person !== personName);
-        localStorage.setItem("ranchWork", JSON.stringify(workEntries));
-        
-        // Odświeżanie wszystkich trzech widoków
-        updateWorkList();
-        updateEarningsSummary();
-        updatePayoutHistory();
+        // ZAPIS OBU RZECZY DO BAZY FIREBASE
+        database.ref('ranchPayouts').set(payoutHistory);
+        database.ref('ranchWork').set(workEntries);
     }
 }
 
-// 3. NOWA funkcja: Rysowanie archiwum na stronie
 function updatePayoutHistory() {
-    const list = document.getElementById("payout-history-list");
-    if (!list) return;
-
-    list.innerHTML = "";
-    if (payoutHistory.length === 0) {
-        list.innerHTML = '<li style="text-align:center; color:#8b7355; font-style:italic;">Brak historii wypłat.</li>';
-        return;
-    }
-
-    // Odwracamy tablicę, żeby najnowsze wypłaty były na samej górze
-    [...payoutHistory].reverse().forEach((payout, index) => {
-        const realIndex = payoutHistory.length - 1 - index;
-        list.innerHTML += `
-            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted rgba(139, 115, 85, 0.4); padding: 5px 0;">
-                <span style="flex-grow: 1;">
-                    <span style="font-size: 10px; color: #8b7355; display: block;">${payout.date}</span>
-                    <strong>${payout.person}</strong>
-                </span>
-                <span style="color: #b71c1c; font-weight: bold; margin-right: 10px;">Wypłacono: ${payout.amount.toFixed(2)}$</span>
-                <button onclick="removePayoutRecord(${realIndex})" style="background:transparent; border:none; color:#5d4037; cursor:pointer; font-size:12px;" title="Usuń z historii">✖</button>
-            </li>
-        `;
+    const list = document.getElementById("payout-history-list"); if (!list) return;
+    list.innerHTML = payoutHistory.length ? "" : '<li style="text-align:center; color:#8b7355; font-style:italic;">Brak historii wypłat.</li>';
+    [...payoutHistory].reverse().forEach((p, i) => {
+        list.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dotted rgba(139,115,85,0.4); padding:5px 0;"><span><span style="font-size:10px; color:#8b7355; display:block;">${p.date}</span><strong>${p.person}</strong></span><span style="color:#b71c1c; font-weight:bold; margin-right:10px;">Wypłacono: ${p.amount.toFixed(2)}$</span><button onclick="removePayoutRecord(${payoutHistory.length - 1 - i})" style="background:none; border:none; color:#5d4037; cursor:pointer;">✖</button></li>`;
     });
 }
 
-// 4. NOWA funkcja: Usuwanie pomyłki z historii
 function removePayoutRecord(index) {
-    if(confirm("Czy na pewno usunąć ten wpis z historii wypłat? (Pieniędzy nie da się już cofnąć do roboczych prac).")) {
+    if(confirm("Usunąć ten wpis z historii wypłat u wszystkich?")) {
         payoutHistory.splice(index, 1);
-        localStorage.setItem("ranchPayouts", JSON.stringify(payoutHistory));
-        updatePayoutHistory();
+        database.ref('ranchPayouts').set(payoutHistory); // WYSYŁKA DO BAZY
     }
 }
 
