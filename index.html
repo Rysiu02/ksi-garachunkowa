@@ -1249,14 +1249,6 @@ function removePayoutRecord(index) {
         database.ref('ranchPayouts').set(payoutHistory); // WYSYŁKA DO BAZY
     }
 }
-
-// 5. Zadbaj, by historia wczytała się po odświeżeniu strony!
-// Dopisz to do swojego document.addEventListener("DOMContentLoaded"... jeśli już go masz:
-document.addEventListener("DOMContentLoaded", function() {
-    if (typeof updatePayoutHistory === "function") {
-        updatePayoutHistory();
-    }
-});
     </script>
 </body>
 </html>
