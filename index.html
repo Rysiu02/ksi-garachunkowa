@@ -420,7 +420,7 @@
 <body>
     <script>
     // Wymuszenie odświeżenia dla nowej aktualizacji
-    const aktualnaWersja = "2.3"; // Zwiększ tę wartość przy każdej aktualizacji, by wymusić odświeżenie
+    const aktualnaWersja = "2.4"; // Zwiększ tę wartość przy każdej aktualizacji, by wymusić odświeżenie
     if (localStorage.getItem("wersjaKsiegi") !== aktualnaWersja) {
         localStorage.setItem("wersjaKsiegi", aktualnaWersja);
         // Dodajemy losowy parametr na koniec linku, by wymusić pobranie z serwera
@@ -781,7 +781,7 @@
             }
         }
 
-        database.ref('wspolna_ksiega').on('value', (snapshot) => {
+        firebase.database().ref('wspolna_ksiega').on('value', (snapshot) => {
             const data = snapshot.val();
             ledgerData = []; notesData = []; totalMoney = 0; inventory = {}; animals = {}; uniqueUsers.clear(); 
 
@@ -836,7 +836,7 @@
             else { soundCoins.currentTime = 0; soundCoins.play().catch(e => console.log(e)); }
 
             const date = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
-            database.ref('wspolna_ksiega').push({ date, name, action, value, quantity });
+            firebase.database().ref('wspolna_ksiega').push({ date, name, action, value, quantity });
             
             document.getElementById('amountOrItem').value = '';
             document.getElementById('noteTextarea').value = '';
@@ -857,7 +857,7 @@
             const date = new Date().toLocaleDateString('pl-PL') + ' ' + new Date().toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
             soundPage.currentTime = 0; soundPage.play().catch(e => console.log(e));
 
-            database.ref('wspolna_ksiega').push({ date, name: "System", action, value, quantity, silent: true });
+            firebase.database().ref('wspolna_ksiega').push({ date, name: "System", action, value, quantity, silent: true });
             
             document.getElementById('silentItem').value = '';
             document.getElementById('silentQty').value = '1';
@@ -1076,22 +1076,22 @@ let defaultTasks = [
 ];
 let taskDefinitions = defaultTasks;
 
-// --- 1. NASŁUCHIWANIE BAZY DANYCH (Automatyczne odświeżanie u wszystkich) ---
-database.ref('ranchTaskDefs').on('value', (snapshot) => {
+// --- 1. NASŁUCHIWANIE BAZY DANYCH (Automatyczne odświeżanie) ---
+firebase.database().ref('ranchTaskDefs').on('value', (snapshot) => {
     const data = snapshot.val();
     taskDefinitions = data ? (Array.isArray(data) ? data : Object.values(data)) : defaultTasks;
     populateTaskSelect();
     renderTaskDefinitions();
 });
 
-database.ref('ranchWork').on('value', (snapshot) => {
+firebase.database().ref('ranchWork').on('value', (snapshot) => {
     const data = snapshot.val();
     workEntries = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
     updateWorkList();
     updateEarningsSummary();
 });
 
-database.ref('ranchPayouts').on('value', (snapshot) => {
+firebase.database().ref('ranchPayouts').on('value', (snapshot) => {
     const data = snapshot.val();
     payoutHistory = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
     updatePayoutHistory();
@@ -1127,7 +1127,7 @@ function addNewTaskDef() {
     
     if (name && !isNaN(pay) && pay >= 0) {
         taskDefinitions.push({ name, pay, type });
-        database.ref('ranchTaskDefs').set(taskDefinitions); // WYSYŁKA DO BAZY
+        firebase.database().ref('ranchTaskDefs').set(taskDefinitions); 
         document.getElementById("newTaskName").value = ""; 
         document.getElementById("newTaskPay").value = "";
     } else alert("Podaj poprawną nazwę i kwotę!");
@@ -1136,7 +1136,7 @@ function addNewTaskDef() {
 function removeTaskDef(index) {
     if(confirm("Usunąć tę pracę z systemu? Zniknie u wszystkich graczy.")) {
         taskDefinitions.splice(index, 1);
-        database.ref('ranchTaskDefs').set(taskDefinitions); // WYSYŁKA DO BAZY
+        firebase.database().ref('ranchTaskDefs').set(taskDefinitions);
     }
 }
 
@@ -1144,34 +1144,61 @@ function removeTaskDef(index) {
 // --- 3. REJESTROWANIE PRACY (Zapis na serwer) ---
 function updatePayAmount() {
     const select = document.getElementById("workTaskSelect");
-    if(select.selectedIndex < 0) return;
+    if(!select || select.selectedIndex < 0) return;
     const opt = select.options[select.selectedIndex];
     
-    const payInput = document.getElementById("workPay"), qtyInput = document.getElementById("workQuantity"), customTask = document.getElementById("customTaskName");
-    const payValue = opt.getAttribute("data-pay"), type = opt.getAttribute("data-type");
+    const payInput = document.getElementById("workPay");
+    const qtyInput = document.getElementById("workQuantity");
+    const customTask = document.getElementById("customTaskName");
+    
+    const payValue = opt.getAttribute("data-pay");
+    const type = opt.getAttribute("data-type");
 
-    qtyInput.style.display = "none"; customTask.style.display = "none"; payInput.readOnly = false; payInput.value = "";
+    if(qtyInput) qtyInput.style.display = "none"; 
+    if(customTask) customTask.style.display = "none"; 
+    if(payInput) {
+        payInput.readOnly = false; 
+        payInput.value = "";
+    }
 
     if (type === "custom") {
-        customTask.style.display = "block"; payInput.placeholder = "Wpisz kwotę ręcznie ($)";
+        if(customTask) customTask.style.display = "block"; 
+        if(payInput) payInput.placeholder = "Wpisz kwotę ręcznie ($)";
     } else if (type === "per_item") {
-        qtyInput.style.display = "block"; payInput.readOnly = true;
-        payInput.value = (parseFloat(payValue) * (parseFloat(qtyInput.value) || 0)).toFixed(2);
+        if(qtyInput) qtyInput.style.display = "block"; 
+        if(payInput) {
+            payInput.readOnly = true;
+            payInput.value = (parseFloat(payValue) * (parseFloat(qtyInput.value) || 0)).toFixed(2);
+        }
     } else if (type === "fixed") {
-        qtyInput.value = "1"; payInput.readOnly = true; payInput.value = parseFloat(payValue).toFixed(2);
+        if(qtyInput) qtyInput.value = "1"; 
+        if(payInput) {
+            payInput.readOnly = true; 
+            payInput.value = parseFloat(payValue).toFixed(2);
+        }
     }
 }
 
 function addWork() {
     const person = document.getElementById("workPerson").value;
     const select = document.getElementById("workTaskSelect");
+    if(!select || select.selectedIndex < 0) {
+        alert("Wybierz pracę z listy!");
+        return;
+    }
     const opt = select.options[select.selectedIndex];
     
     let taskName = opt.value;
     const type = opt.getAttribute("data-type");
-    const customTaskVal = document.getElementById("customTaskName").value;
-    const qty = parseInt(document.getElementById("workQuantity").value) || 1;
-    const pay = parseFloat(document.getElementById("workPay").value);
+    
+    const customTaskInput = document.getElementById("customTaskName");
+    const customTaskVal = customTaskInput ? customTaskInput.value : "";
+    
+    const qtyInput = document.getElementById("workQuantity");
+    const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+    
+    const payInput = document.getElementById("workPay");
+    const pay = payInput ? parseFloat(payInput.value) : 0;
 
     if (type === "custom") {
         if (!customTaskVal.trim()) return alert("Podaj nazwę okazjonalnego zadania!");
@@ -1182,20 +1209,24 @@ function addWork() {
         if (type === "per_item") taskName += ` (x${qty})`;
         
         workEntries.push({ person, task: taskName, pay });
-        database.ref('ranchWork').set(workEntries); // WYSYŁKA DO BAZY
+        
+        // WYPCHNIĘCIE NA SERWER FIREBASE
+        firebase.database().ref('ranchWork').set(workEntries);
 
         document.getElementById("workPerson").value = ""; 
         select.selectedIndex = 0;
-        document.getElementById("workQuantity").value = "1"; 
-        document.getElementById("customTaskName").value = "";
+        if(qtyInput) qtyInput.value = "1"; 
+        if(customTaskInput) customTaskInput.value = "";
+        if(payInput) payInput.value = "";
         updatePayAmount();
+        
     } else alert("Wypełnij imię, wybierz zadanie i podaj kwotę!");
 }
 
 function removeWork(index) {
     if(confirm("Usunąć ten wpis o pracy u wszystkich graczy?")) {
         workEntries.splice(index, 1);
-        database.ref('ranchWork').set(workEntries); // WYSYŁKA DO BAZY
+        firebase.database().ref('ranchWork').set(workEntries);
     }
 }
 
@@ -1211,7 +1242,10 @@ function updateWorkList() {
 
 function updateEarningsSummary() {
     const summary = document.getElementById("earnings-summary-list"); if (!summary) return;
-    if (!workEntries.length) return summary.innerHTML = '<div style="text-align:center; color:#8b7355; font-style:italic;">Brak wykonanych prac.</div>';
+    if (!workEntries.length) {
+        summary.innerHTML = '<div style="text-align:center; color:#8b7355; font-style:italic;">Brak wykonanych prac.</div>';
+        return;
+    }
     
     const earnings = {};
     workEntries.forEach(w => earnings[w.person] = (earnings[w.person] || 0) + w.pay);
@@ -1229,9 +1263,8 @@ function payPerson(person, amount) {
         payoutHistory.push({ date: dateStr, person, amount });
         workEntries = workEntries.filter(w => w.person !== person);
         
-        // ZAPIS OBU RZECZY DO BAZY FIREBASE
-        database.ref('ranchPayouts').set(payoutHistory);
-        database.ref('ranchWork').set(workEntries);
+        firebase.database().ref('ranchPayouts').set(payoutHistory);
+        firebase.database().ref('ranchWork').set(workEntries);
     }
 }
 
@@ -1246,7 +1279,22 @@ function updatePayoutHistory() {
 function removePayoutRecord(index) {
     if(confirm("Usunąć ten wpis z historii wypłat u wszystkich?")) {
         payoutHistory.splice(index, 1);
-        database.ref('ranchPayouts').set(payoutHistory); // WYSYŁKA DO BAZY
+        firebase.database().ref('ranchPayouts').set(payoutHistory);
+    }
+}
+
+// --- FUNKCJE OTWIERANIA/ZAMYKANIA PANELI ---
+function toggleWorkFrame() {
+    const frame = document.getElementById("work-frame");
+    if (frame) {
+        frame.style.display = frame.style.display === "none" || frame.style.display === "" ? "flex" : "none";
+    }
+}
+
+function toggleTaskManager() {
+    const frame = document.getElementById("task-manager-frame");
+    if (frame) {
+        frame.style.display = frame.style.display === "none" || frame.style.display === "" ? "flex" : "none";
     }
 }
     </script>
